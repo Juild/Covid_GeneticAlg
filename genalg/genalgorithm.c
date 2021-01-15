@@ -2,11 +2,25 @@
 
 
 
-void generate_genome(){
+void generate_genome(int pos*){
+
+
 
 }
 
-void generate_population(){
+
+
+void generate_population(unsigned long individuals){
+
+	Genome * population;
+
+	population=(Genome *)malloc(individuals*sizeof(Genome));
+
+	for(i=0;i<individuals;i++){
+		generate_genome(population,i)
+
+	}
+
 
 }
 
