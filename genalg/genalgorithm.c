@@ -7,9 +7,11 @@ void generate_genome(int pos*){
 
 
 }
+void random_num(int low, int high){
 
+}
 
-
+asdafdasdfd
 void generate_population(unsigned long individuals){
 
 	Genome * population;
@@ -31,9 +33,6 @@ void pair_selection(){
 void sort(){
 
 }
-
-
-
 
 
 
