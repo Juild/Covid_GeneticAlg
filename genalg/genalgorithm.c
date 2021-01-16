@@ -8,7 +8,7 @@ void generate_genome(Genome * genome) {
 	//generating initial states for chromosome 1
 	for (int i = 0; i < 3; i++) genome -> c1[i] = random_num();
 	//generating initial states for chromosome 2
-	for(int i = 0; i < 11; i++) genome -> c2[i] = random_num();
+	for (int i = 0; i < 11; i++) genome -> c2[i] = random_num();
 	genome->fitness = -1;
 	printf("Individual generated");
 }
@@ -113,7 +113,7 @@ void crossover_genomes(
 	gen2out->fitness = -1;
 }
 
-/*
+/*  PUTA MERDA SI JAJAJA TORNO AL MOVIL NO EM VAN ELS CASCOS BEUNO ADEU SI
  * Implementation of elitism operator.
  * This selects the best of the best individuals to be passed over to the next generation.
  *
@@ -181,6 +181,13 @@ void copy_genome(Genome * in, Genome * out) {
 	memcpy(out->c2, in->c2, 11 * sizeof(double));
 	out->fitness = in->fitness;
 }
+///////////////////////////////////////////////////////////////////////////////
+									//fitnessess
+void fitness(){
+
+}
+
+
 
 double fitness_uniform(double ** solution) {
 	int i, j;
@@ -202,6 +209,7 @@ double fitness_linear(double ** solution) {
 	return f;
 }
 
+# define EXP_NU 0.05
 double fitness_exp(double ** solution) {
 	int i, j;
 	double f = 0.0;
@@ -234,9 +242,9 @@ void evolution() {
 																//Main Function//
 //////////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char * argv) {
-	int individuals;
-	int maxiter;
-	int pop_size;
+	int individuals = 100;
+	int maxiter = 10;
+	int pop_size = 100;
 	int termination=0;
 	int iter=0;
 	double fitness_threshold=10;
