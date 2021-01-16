@@ -11,7 +11,7 @@ void random_num(int low, int high){
 
 }
 
-asdafdasdfd
+
 void generate_population(unsigned long individuals){
 
 	Genome * population;
