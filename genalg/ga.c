@@ -61,7 +61,7 @@ void crossover_genomes(
 ) {
 	// cross initial conditions
 	int i;
-	int val = random_int(GENES_C1 - 1); // exclude last position as that means no change!
+	int val = random_int(GENES_C1);
 	for (i = 0; i < GENES_C1; i++) {
 		if (i < val) { // copy as is
 			gen1out->c1[i] = gen1in->c1[i];
@@ -72,7 +72,7 @@ void crossover_genomes(
 		}
 	}
 
-	val = random_int(GENES_C2 - 1); // exclude last position as that means no change!
+	val = random_int(GENES_C2);
 	for (i = 0; i < GENES_C2; i++) {
 		if (i < val) { // copy as is
 			gen1out->c2[i] = gen1in->c2[i];
