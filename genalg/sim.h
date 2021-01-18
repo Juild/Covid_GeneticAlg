@@ -38,9 +38,10 @@ void genotype_to_phenotype(Genome * genome, IC * ic, Parameters * params);
 /*
  * This function ideally should take care of calling genotype_to_phenotype,
  * calling evolve which runs the runge-kutta and computing the fitness using the
- * passed fit_func. This fitness is the value returned.
+ * passed fit_func. This fitness should be added to the genome!!
+ * returns the status, 0 if everything fine.
  */
-double compute_fitness(Genome * genome, double (* fit_func) (double **));
+int compute_fitness(Genome * genome, double (* fit_func) (double **));
 
 /* Copy the code in the pdf!
  * @param x vector with initial conditions
