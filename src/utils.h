@@ -17,7 +17,7 @@ unsigned int random_int(unsigned int n_max);
 # define DAYS 101
 # define N_PARAMS 5
 
-const double DATA[DAYS][N_PARAMS] = {
+static const double DATA[DAYS][N_PARAMS] = {
 	{ 1.00, 1.00, 0.00, 0.00, 0.000 },
 	{ 1.84, 1.25, 0.05, 0.34, 0.000 },
 	{ 2.28, 1.60, 0.12, 0.73, 0.002 },
@@ -120,5 +120,6 @@ const double DATA[DAYS][N_PARAMS] = {
 	{ 23002.29, 32448.13, 9788.18, 71455.07, 1629.977 },
 	{ 24711.26, 34688.48, 10562.48, 77627.19, 1777.437 }
 };
+
 
 # endif
