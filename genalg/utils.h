@@ -1,63 +1,23 @@
-#ifndef utils
-#define utils
-#define crom2IC(c) (((double) c)/1000) // Initial conditions
-#define crom2HSPar(c) (((double) c)/1099511627776UL) // High sensitivity
-#define crom2Par(c) (((double) c)/1048576U) // Medium sensitivity
-#define crom2LSPar(c) (((double) c)/1024U) // Low sensitivity
+# ifndef __HEADER_UTILS__
+# define __HEADER_UTILS__
 
+# include <stdlib.h>
+# include <stdio.h>
+# include <gsl/gsl_rng.h>
 
 //functions
+void exit_error(const char *miss, int errcode);
 
-void ExitError(const char *miss, int errcode)
-{
-    fprintf (stderr, "\nERROR: %s.\nStopping...\n\n", miss); exit(errcode);
-}
+void init_rng();
+void free_rng();
+double random_double();
+unsigned long random_ulong();
+unsigned int random_int(unsigned int n_max);
 
+# define DAYS 101
+# define N_PARAMS 5
 
-
-// we are going to use a two chromosome genome,
-typedef struct Genome {
-	unsigned long c1[3];
-	unsigned long c2[11];
-	double fitness;
-} Genome;
-
-
-typedef struct chromosome1{
-	double E;
-	double I1;
-	double A;
-}chromosome1;
-
-typedef struct chromosome2{
-
-	double beta;
-	double phi;
-	double e1;
-	double eY;
-	double sigma;
-	double gamma1;
-	double gamma2;
-	double kappa;
-	double p;
-	double alpha;
-	double delta;
-
-}chromosome2;
-
-
-
-typedef struct EncGen{
-
-}
-
-typedef struct params{
-
-}
-
-# define DAYS 100
-
-const double DATA[DAYS][] = {
+const double DATA[DAYS][N_PARAMS] = {
 	{ 1.00, 1.00, 0.00, 0.00, 0.000 },
 	{ 1.84, 1.25, 0.05, 0.34, 0.000 },
 	{ 2.28, 1.60, 0.12, 0.73, 0.002 },
@@ -160,3 +120,5 @@ const double DATA[DAYS][] = {
 	{ 23002.29, 32448.13, 9788.18, 71455.07, 1629.977 },
 	{ 24711.26, 34688.48, 10562.48, 77627.19, 1777.437 }
 };
+
+# endif
