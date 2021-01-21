@@ -25,8 +25,10 @@ typedef struct Genome {
 void generate_genome(Genome * genome);
 
 Genome * generate_population(int individuals);
-int next_generation(Genome * parents, Genome * children,
-	int n_elitism, int n_select, int n_cross, double p_mutation);
+int next_generation(
+	Genome * parents, Genome * children,
+	int n_elitism, int n_select, int n_cross, int n_new, double p_mutation
+);
 
 /*
  * Copies the information in the input genome to the output genome.
@@ -57,7 +59,7 @@ void mutate_genome(Genome * genome, double p_mut);
  *
  * @return the position of the best individual
  */
-int elitism(Genome * population, int pop_size, int number_elitism, Genome * out);
+void elitism(Genome * population, int pop_size, int number_elitism, Genome * out);
 
 /*
  * Implementation of roulette wheel method.
@@ -69,6 +71,14 @@ int elitism(Genome * population, int pop_size, int number_elitism, Genome * out)
  * @param best_genomes the number of best individuals to choose
  * @param out the population to be filled with the best individuals
  */
-void casting(Genome * population, int pop_size, int best_genomes, Genome * out);
+int casting(Genome * population, int pop_size, int best_genomes, Genome * out);
+
+/*
+ * Add `n_new` individuals to the start of the passed genome array.
+ */
+void migration(
+	Genome * genome,
+	int n_new
+);
 
 # endif

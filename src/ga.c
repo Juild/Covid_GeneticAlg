@@ -72,7 +72,7 @@ void crossover_genomes(
 ) {
 	// cross initial conditions
 	int i;
-	int val = random_int(GENES_C1);
+	int val = random_int(GENES_C1 + GENES_C2);
 	for (i = 0; i < GENES_C1; i++) {
 		if (i < val) { // copy as is
 			gen1out->c1[i] = gen1in->c1[i];
@@ -83,7 +83,7 @@ void crossover_genomes(
 		}
 	}
 
-	val = random_int(GENES_C2);
+	val -= GENES_C2;
 	for (i = 0; i < GENES_C2; i++) {
 		if (i < val) { // copy as is
 			gen1out->c2[i] = gen1in->c2[i];
@@ -106,10 +106,8 @@ void crossover_genomes(
  * @param pop_size the total population size
  * @param number_elitism the number of best individuals to be selected
  * @param out the population to be filled with the best individuals
- *
- * @return the position of the best individual
  */
-int elitism(Genome * population, int pop_size, int number_elitism, Genome * out) {
+void elitism(Genome * population, int pop_size, int number_elitism, Genome * out) {
 	int i, j;
 	int best_index[number_elitism];
 
@@ -124,15 +122,8 @@ int elitism(Genome * population, int pop_size, int number_elitism, Genome * out)
 				best_index[j] = i; break;
 			}
 
-	int best_of_the_best = best_index[0];
-
 	// copy the best individuals to the out population
-	for (j = 0; j < number_elitism; j++) {
-		copy_genome(population + best_index[j], out + j);
-		if (out[j].fitness < population[best_of_the_best].fitness) best_of_the_best = best_index[j];
-	}
-
-	return best_of_the_best;
+	for (j = 0; j < number_elitism; j++) copy_genome(population + best_index[j], out + j);
 }
 
 /*
@@ -144,19 +135,25 @@ int elitism(Genome * population, int pop_size, int number_elitism, Genome * out)
  * @param pop_size the total population size
  * @param best_genomes the number of best individuals to choose
  * @param out the population to be filled with the best individuals
+ *
+ * @return the index corresponding to the best individual
  */
-void casting(Genome * population, int pop_size, int best_genomes, Genome * out) {
+int casting(Genome * population, int pop_size, int best_genomes, Genome * out) {
 	// roulette wheeeeeeeel
-	double sum_p, * p_cumsum, p;
+	double sum_p, * p_cumsum, p, best_p = -1;
 	p_cumsum = (double *) malloc(pop_size * sizeof(double));
 
-	int i, j;
+	int i, j, best_index;
 	p_cumsum[0] = 1.0 / population[0].fitness;
 	sum_p = p_cumsum[0];
 	for (i = 1; i < pop_size; i++) {
 		p = 1.0 / population[i].fitness;
 		p_cumsum[i] = p_cumsum[i - 1] + p;
 		sum_p += p;
+		if (p > best_p) {
+			best_p = p;
+			best_index = j;
+		}
 	}
 	//normalise
 	for (i = 0; i < pop_size; i++) p_cumsum[i] /= sum_p;
@@ -164,9 +161,20 @@ void casting(Genome * population, int pop_size, int best_genomes, Genome * out) 
 	for (i = 0; i < best_genomes; i++) {
 		p = random_double();
 		for (j = 0; j < pop_size; j++) if (p <= p_cumsum[j]) break;
-
 		copy_genome(population + j, out + i);
 	}
+
+	return best_index;
+}
+
+/*
+ * Add `n_new` individuals to the start of the passed genome array.
+ */
+void migration(
+	Genome * genome,
+	int n_new
+) {
+	for (int i = 0; i < n_new; i++) generate_genome(genome + i);
 }
 
 /*
@@ -179,32 +187,36 @@ void copy_genome(Genome * in, Genome * out) {
 	out->fitness = in->fitness;
 }
 
-int next_generation(Genome * parents, Genome * children,
-	int n_elitism, int n_select, int n_cross, double p_mutation) {
-	int pop_size = n_elitism + n_select + n_cross;
-	if (n_cross % 2 == 1) {
-		// ensure ǹumber of crossover is even
-		n_select -= 1; n_cross += 1;
-	}
+int next_generation(
+	Genome * parents, Genome * children,
+	int n_elitism, int n_select, int n_cross, int n_new, double p_mutation
+) {
+	int pop_size = n_elitism + n_select + n_cross + n_new;
+	int i;
+
+	if (n_cross % 2 == 1) // ensure ǹumber of crossover is even
+		exit_error("Please define the crossover number as even!", 33);
 
 	// elitism takes the x bests and puts them to the new generation
-	int best_individual = elitism(parents, pop_size, n_elitism, children);
+	if (n_elitism > 0) elitism(parents, pop_size, n_elitism, children);
 
-	// casting  sorts the people surviving by order of fitness
-	casting(parents, pop_size, n_select, children + n_elitism);
+	// casting selects the best individuals randomly by fitness
+	int best_individual = casting(parents, pop_size, n_select, children + n_elitism);
 
 	// crossover crosses the survivals to get new better individuals
 	Genome * last_individual = children + n_elitism + n_select;
 	int n_cross_half = n_cross / 2;
-	for(int i = 0; i < n_cross_half; i++) {
+	for(i = 0; i < n_cross_half; i++) {
 		// at each iter, two individuals are added
 		tinder(children, n_elitism + n_select, last_individual);
 		last_individual += 2;
 	}
+
 	// mutations mutate a bit some people so a bit of randomness is included
-	for (int i = n_elitism; i < pop_size; i++)
-		// exclude elitist from mutation! this is rather artificial
-		mutate_genome(children + i, p_mutation);
+	// exclude elitist from mutation! this is rather artificial
+	if (p_mutation > 0) for (i = n_elitism; i < pop_size - n_new; i++) mutate_genome(children + i, p_mutation);
+
+	if (n_new > 0) migration(children + (pop_size - n_new), n_new);
 
 	return best_individual;
 }

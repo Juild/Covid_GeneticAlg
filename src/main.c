@@ -1,6 +1,36 @@
+# include <stdio.h>
 # include "sim.h"
 # include "ga.h"
 # include "utils.h"
+
+/*
+ * Just for statistic purposes.
+ */
+void save_population(Genome * population, int individuals, const char * filename) {
+	FILE *fp;
+
+	if ((fp = fopen(filename, "w")) != 0)
+		printf("Could not open file");
+
+	for (int i = 0; i < individuals; i++) {
+		fprintf(fp, "%.8f,%ld,%ld,%ld",
+				population[i].fitness, population[i].c1[0], population[i].c1[1], population[i].c1[2]);
+		fprintf(fp, "%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld",
+				population[i].c2[0],
+				population[i].c2[1],
+				population[i].c2[2],
+				population[i].c2[3],
+				population[i].c2[4],
+				population[i].c2[5],
+				population[i].c2[6],
+				population[i].c2[7],
+				population[i].c2[8],
+				population[i].c2[9],
+				population[i].c2[10]);
+	}
+
+	fclose(fp);
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // Main Function //////////////////////////////////////////////////////////////////////
@@ -14,7 +44,7 @@ int main(int argc, char ** argv) {
 	double fitness_threshold = 1;
 
 	int number_elitism = (int) (0.1 * pop_size);
-	int number_selection = (int) (0.6 * pop_size);
+	int number_selection = (int) (0.5 * pop_size);
 	int number_crossover = pop_size - number_elitism - number_selection;
 	int best_individual;
 
@@ -35,9 +65,11 @@ int main(int argc, char ** argv) {
         for (i = 0; i < individuals; i++) // exclude those simulation of repeated genes to speed up simulation!
             if (population[i].fitness < 0) compute_fitness(population + i, fitness_exp);
 
+		save_population(population, individuals, "step_" + i);
+
 		// elitism takes the x bests and puts them to the new generation
 		best_individual = next_generation(population, temp_population,
-                                          number_elitism, number_selection, number_crossover, 0.01);
+                                          number_elitism, number_selection, number_crossover, 0, 0.01);
 
 		// termination condition
 		if (population[best_individual].fitness < fitness_threshold || iter > maxiter) {
