@@ -59,3 +59,7 @@ double fitness_max(double ** solution) {
 
 	return max_f;
 }
+
+int compute_fitness(Genome * genome, double (* fit_func) (double **)) {
+	return 0;
+}

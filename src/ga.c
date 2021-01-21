@@ -9,9 +9,7 @@ void generate_genome(Genome * genome) {
 	printf("Individual generated");
 }
 
-
-Genome * generate_population(unsigned long individuals) {
-	printf("Generating population...\n");
+Genome * generate_population(int individuals) {
 	Genome * population;
 
 	if( (population = (Genome *) malloc(individuals * sizeof(Genome)))== NULL )
@@ -19,23 +17,36 @@ Genome * generate_population(unsigned long individuals) {
 
 	for(int i = 0; i < individuals; i++) generate_genome(population + i);
 
-	printf("Population of %ld generated \n",individuals);
+	printf("Population of %d generated \n",individuals);
 	return population;
 }
 
 void tinder(Genome * population, int pop_size, Genome * last_individual) { //Superlike
-
 	int ind1 = random_int(pop_size);
 	int ind2;
 
 	while ((ind2 = random_int(pop_size)) == ind1);
 
-	crossover_genomes(population+ind1, population+ind2, last_individual + 1, last_individual + 2);
+	crossover_genomes(population + ind1, population + ind2, last_individual, last_individual + 1);
 }
 
 //genetic functions
-void bitwise_mutation(unsigned int *f, double prob) {
-	if (random_double() < prob) *f = (*f)^(1U << ((unsigned char) random_double()*8*sizeof(*f)));
+int bitwise_mutation(unsigned long *f, double prob) {
+	if (random_double() < prob) {
+		*f = (*f)^(1U << ((unsigned char) random_double()*8*sizeof(*f)));
+		return 1;
+	}
+	return 0;
+}
+
+void mutate_genome(Genome * genome, double prob) {
+	int i;
+	for (i = 0; i < GENES_C1; i++)
+		if (bitwise_mutation(genome->c1 + i, prob)) // gen `i` has been mutate, so reset fitness to default
+			genome->fitness = -1;
+	for (i = 0; i < GENES_C2; i++)
+		if (bitwise_mutation(genome->c2 + i, prob)) // gen `i` has been mutate, so reset fitness to default
+			genome->fitness = -1;
 }
 
 
@@ -168,67 +179,32 @@ void copy_genome(Genome * in, Genome * out) {
 	out->fitness = in->fitness;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-																//Main Function//
-//////////////////////////////////////////////////////////////////////////////////////
-int main(int argc, char ** argv) {
-	int individuals = 100;
-	int maxiter = 10;
-	int pop_size = 100;
-	int termination=0;
-	int iter=0;
-	double fitness_threshold=10;
+int next_generation(Genome * parents, Genome * children,
+	int n_elitism, int n_select, int n_cross, double p_mutation) {
+	int pop_size = n_elitism + n_select + n_cross;
+	if (n_cross % 2 == 1) {
+		// ensure ǹumber of crossover is even
+		n_select -= 1; n_cross += 1;
+	}
 
-	int number_elitism = (int) (0.1 * pop_size);
-	int number_selection = (int) (0.6 * pop_size);
-	int number_crossover = pop_size - number_elitism - number_selection;
-	int best_individual;
+	// elitism takes the x bests and puts them to the new generation
+	int best_individual = elitism(parents, pop_size, n_elitism, children);
 
+	// casting  sorts the people surviving by order of fitness
+	casting(parents, pop_size, n_select, children + n_elitism);
 
-	printf("Initializing population\n");
-	Genome * population;
-	Genome * temp_population;
-	temp_population = (Genome *) malloc(individuals * sizeof(Genome));
+	// crossover crosses the survivals to get new better individuals
+	Genome * last_individual = children + n_elitism + n_select;
+	int n_cross_half = n_cross / 2;
+	for(int i = 0; i < n_cross_half; i++) {
+		// at each iter, two individuals are added
+		tinder(children, n_elitism + n_select, last_individual);
+		last_individual += 2;
+	}
+	// mutations mutate a bit some people so a bit of randomness is included
+	for (int i = n_elitism; i < pop_size; i++)
+		// exclude elitist from mutation! this is rather artificial
+		mutate_genome(children + i, p_mutation);
 
-	init_rng();
-
-	population = generate_population(individuals);
-
-	int i;
-
-	printf("Entering genetic algorithm\n");
-	do {
-
-	 	// fitness calculates the fitness of every guy in the population
-
-		// elitism takes the x bests and puts them to the new generation
-		best_individual = elitism(population, pop_size, number_elitism, temp_population);
-
-		// casting  sorts the people surviving by order of fitness
-		casting(population, pop_size, number_selection, temp_population + number_elitism);
-
-		// crossover crosses the survivals to get new better individuals
-		Genome * last_individual = temp_population + number_elitism + number_selection;
-		for(i = 0; i < number_crossover / 2; i++) // at each iter, two individuals are added
-			tinder(temp_population, number_elitism + number_selection, last_individual);
-		// mutations mutate a bit some people so a bit of randomness is included
-		for (i = number_elitism; i < pop_size; i++) {
-			// exclude elitist from mutation! this is rather artificial
-		}
-
-
-		// termination condition
-		if (population[best_individual].fitness < fitness_threshold || iter > maxiter) {
-			termination=1;
-			if (population[best_individual].fitness < fitness_threshold)
-				printf("Exiting genetic algorithm by fitness threshold\n");
-			if (iter > maxiter)
-				printf("Exiting genetic algorithm by maxiter reached\n");
-		}
-
-	} while(termination == 0);
-
-	printf("Exited genetic algorithm\n");
-	printf("Fitness reached of %f, and total iterations of %d", population[best_individual].fitness, iter);
-	free_rng();
+	return best_individual;
 }

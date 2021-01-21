@@ -24,7 +24,9 @@ typedef struct Genome {
 
 void generate_genome(Genome * genome);
 
-Genome * generate_population(unsigned long individuals);
+Genome * generate_population(int individuals);
+int next_generation(Genome * parents, Genome * children,
+	int n_elitism, int n_select, int n_cross, double p_mutation);
 
 /*
  * Copies the information in the input genome to the output genome.
@@ -41,6 +43,8 @@ void crossover_genomes(
 	Genome * gen1out,
 	Genome * gen2out
 );
+
+void mutate_genome(Genome * genome, double p_mut);
 
 /*
  * Implementation of elitism operator.
