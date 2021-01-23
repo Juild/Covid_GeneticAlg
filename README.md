@@ -12,4 +12,4 @@ Then, simply navigate to the root directory of the project and run:
     cmake .
     make covidga
 
-You should see a lot of new files being created, the only importat one is the executable file `covidga`.
+You should see a lot of new files being created, the only important one is the executable file `covidga`.

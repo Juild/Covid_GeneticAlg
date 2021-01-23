@@ -37,15 +37,15 @@ void save_population(Genome * population, int individuals, const char * filename
 ///////////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char ** argv) {
 	int individuals = 100;
-	int maxiter = 10;
+	int maxiter = 10; // ficar la possibilitat de donarho en runtime
 	int pop_size = 100;
 	int termination=0;
 	int iter=0;
 	double fitness_threshold = 1;
 
-	int number_elitism = (int) (0.1 * pop_size);
-	int number_selection = (int) (0.5 * pop_size);
-	int number_crossover = pop_size - number_elitism - number_selection;
+	int number_elitism = (int) (0.1 * individuals);
+	int number_selection = (int) (0.5 * individuals);
+	int number_crossover = individuals - number_elitism - number_selection;
 	int best_individual;
 
 	Genome * population;
@@ -65,7 +65,7 @@ int main(int argc, char ** argv) {
         for (i = 0; i < individuals; i++) // exclude those simulation of repeated genes to speed up simulation!
             if (population[i].fitness < 0) compute_fitness(population + i, fitness_exp);
 
-		save_population(population, individuals, "step_" + i);
+		// save_population(population, individuals, "step_" + i); pero esta bé
 
 		// elitism takes the x bests and puts them to the new generation
 		best_individual = next_generation(population, temp_population,
@@ -73,7 +73,7 @@ int main(int argc, char ** argv) {
 
 		// termination condition
 		if (population[best_individual].fitness < fitness_threshold || iter > maxiter) {
-			termination=1;
+			termination = 1;
 			if (population[best_individual].fitness < fitness_threshold)
 				printf("Exiting genetic algorithm by fitness threshold\n");
 			if (iter > maxiter)

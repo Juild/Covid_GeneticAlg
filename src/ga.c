@@ -206,7 +206,7 @@ int next_generation(
 	// crossover crosses the survivals to get new better individuals
 	Genome * last_individual = children + n_elitism + n_select;
 	int n_cross_half = n_cross / 2;
-	for(i = 0; i < n_cross_half; i++) {
+	for (i = 0; i < n_cross_half; i++) {
 		// at each iter, two individuals are added
 		tinder(children, n_elitism + n_select, last_individual);
 		last_individual += 2;
