@@ -31,12 +31,37 @@ void save_population(Genome * population, int individuals, const char * filename
 
 	fclose(fp);
 }
+void save_bestind(Genome * population, int bestindividual){
+	FILE *fp;
 
+
+	if ((fp = fopen("bestindividual.txt", "w")) != 0)
+		printf("Could not open file");
+
+	fprintf(fp, "fitness: %.8f ,E: %ld  ,I_1: %ld  ,A: %ld \n",
+					population[bestindividual].fitness, population[bestindividual].c1[0], population[bestindividual].c1[1], population[bestindividual].c1[2]);
+	fprintf(fp, "beta: %ld  ,phi: %ld  ,epsilon_i: %ld \nepsilon_Y: %ld  ,sigma: %ld  ,gamma_1: %ld \ngamma_2: %ld  ,kappa: %ld  ,p: %ld \nalpha: %ld  ,delta: %ld",
+				population[bestindividual].c2[0],
+				population[bestindividual].c2[1],
+				population[bestindividual].c2[2],
+				population[bestindividual].c2[3],
+				population[bestindividual].c2[4],
+				population[bestindividual].c2[5],
+				population[bestindividual].c2[6],
+				population[bestindividual].c2[7],
+				population[bestindividual].c2[8],
+				population[bestindividual].c2[9],
+				population[bestindividual].c2[10]);
+
+	fclose(fp);
+
+
+}
 ///////////////////////////////////////////////////////////////////////////////////////
 // Main Function //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char ** argv) {
-	int individuals = 100;
+	int individuals = 1000;
 	int maxiter = 1000; // ficar la possibilitat de donarho en runtime
 	int termination=0;
 	int iter=0;
@@ -61,7 +86,7 @@ int main(int argc, char ** argv) {
 
 	printf("Entering genetic algorithm\n");
 	do {
-		printf("Generation %d\n", iter);
+		if(iter % (maxiter/10) == 0)printf("Generation %d\n", iter);
 	 	// fitness calculates the fitness of every guy in the population
         for (i = 0; i < individuals; i++) // exclude those simulation of repeated genes to speed up simulation!
             if (population[i].fitness < 0) compute_fitness(population + i, fitness_exp);
@@ -88,6 +113,7 @@ int main(int argc, char ** argv) {
         }
 	} while(termination == 0);
 
+	save_bestind(population,best_individual);
 	printf("Exited genetic algorithm\n");
 	printf("Fitness reached of %f, and total iterations of %d\n", population[best_individual].fitness, iter);
 	free_rng();
