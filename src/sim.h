@@ -41,7 +41,7 @@ void genotype_to_phenotype(Genome * genome, IC * ic, Parameters * params);
  * passed fit_func. This fitness should be added to the genome!!
  * returns the status, 0 if everything fine.
  */
-int compute_fitness(Genome * genome, double (* fit_func) (double **));
+int compute_fitness(Genome * genome, double (* fit_func) (double [DAYS][N_PARAMS]));
 
 /* Copy the code in the pdf!
  * @param x vector with initial conditions
@@ -53,7 +53,7 @@ int evolve(double * x, void * params, double ** xt);
 # define EXP_NU 0.05
 double fitness_uniform(double ** solution);
 double fitness_linear(double ** solution);
-double fitness_exp(double ** solution);
+double fitness_exp(double solution[DAYS][N_PARAMS]);
 double fitness_max(double ** solution);
 
 # endif

@@ -6,7 +6,6 @@ void generate_genome(Genome * genome) {
 	//generating initial states for chromosome 2
 	for (int i = 0; i < GENES_C2; i++) genome -> c2[i] = random_ulong();
 	genome->fitness = -1;
-	printf("Individual generated");
 }
 
 Genome * generate_population(int individuals) {
@@ -152,7 +151,7 @@ int casting(Genome * population, int pop_size, int best_genomes, Genome * out) {
 		sum_p += p;
 		if (p > best_p) {
 			best_p = p;
-			best_index = j;
+			best_index = i;
 		}
 	}
 	//normalise
