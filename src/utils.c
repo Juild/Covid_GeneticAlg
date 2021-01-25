@@ -8,6 +8,7 @@ static gsl_rng * rng = NULL;
 
 void init_rng() {
     rng = gsl_rng_alloc(gsl_rng_default);
+    gsl_rng_set(rng, (unsigned) time(NULL));
 }
 
 void free_rng() {

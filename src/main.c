@@ -31,15 +31,17 @@ void save_population(Genome * population, int individuals, const char * filename
 
 	fclose(fp);
 }
+
+
 void save_bestind(Genome * population, int bestindividual){
 	FILE *fp;
-
 
 	if ((fp = fopen("bestindividual.txt", "w")) != 0)
 		printf("Could not open file");
 
 	fprintf(fp, "fitness: %.8f ,E: %ld  ,I_1: %ld  ,A: %ld \n",
-					population[bestindividual].fitness, population[bestindividual].c1[0], population[bestindividual].c1[1], population[bestindividual].c1[2]);
+			population[bestindividual].fitness, population[bestindividual].c1[0], population[bestindividual].c1[1],
+			population[bestindividual].c1[2]);
 	fprintf(fp, "beta: %ld  ,phi: %ld  ,epsilon_i: %ld \nepsilon_Y: %ld  ,sigma: %ld  ,gamma_1: %ld \ngamma_2: %ld  ,kappa: %ld  ,p: %ld \nalpha: %ld  ,delta: %ld",
 				population[bestindividual].c2[0],
 				population[bestindividual].c2[1],

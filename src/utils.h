@@ -4,6 +4,7 @@
 # include <stdlib.h>
 # include <stdio.h>
 # include <gsl/gsl_rng.h>
+# include <time.h>
 
 //functions
 void exit_error(const char *miss, int errcode);
