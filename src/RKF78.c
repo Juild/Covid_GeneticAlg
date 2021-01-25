@@ -27,8 +27,6 @@
  * version 1.0 implemented by Lluis Alseda on Jan 3, 2020 */
 
 #include "RKF78.h"
-#include <math.h>
-#include <values.h>
 
 /* The functions RKF78 and RKF78Sys included here are an implementation
  * of the Runge-Kutta-Fehlberg method of orders 7 and 8 using a total of
@@ -209,7 +207,7 @@ int RKF78( double *t, double *x,
            void *ParmsStruct,
            void (*ODE)(double, double, double *, void *))
 {   double ksub[13], x7pred, x8pred, tolr;
-    *err = MAXDOUBLE;
+    *err = DBL_MAX;
 
 /* Computing the values h*k_i with i=0,1,2,...,12
  * NOTE: The subindices have been numbered from 0 to 12
@@ -303,7 +301,7 @@ int RKF78Sys( double *t, double x[], unsigned VField_dim,
                          &ksub_space[3][0],  &ksub_space[4][0],  &ksub_space[5][0],
                          &ksub_space[6][0],  &ksub_space[7][0],  &ksub_space[8][0],
                          &ksub_space[9][0], &ksub_space[10][0], &ksub_space[11][0], &ksub_space[12][0] };
-    double nor, tolr; *err = MAXDOUBLE;
+    double nor, tolr; *err = DBL_MAX;
 
 /* Computing the vectors h*k_i with i=0,1,2,...,12
  * NOTE: The subindices have been numbered from 0 to 12

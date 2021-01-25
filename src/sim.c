@@ -38,7 +38,7 @@ double fitness_linear(double ** solution) {
 	return f;
 }
 
-double fitness_exp(double solution[DAYS][N_PARAMS]) {
+double fitness_exp(double ** solution) {
 	int i, j;
 	double f = 0.0;
 	for (i = 1; i < DAYS; i++)
@@ -76,8 +76,8 @@ void CoreModel(double t, double * x, unsigned dim, double * der, void * params){
 }
 
 
-int run_runge_putta(double * xt, void * ODE_pars, double out_data[DAYS][N_PARAMS]) {
-	register unsigned ndays;
+int run_runge_putta(double * xt, void * ODE_pars, double ** out_data) {
+	register int ndays;
 	double t = 0.0, err, h = 1.e-3;
 	for (ndays = 1; ndays <= DAYS; ++ndays) {
 		int status;
@@ -89,6 +89,7 @@ int run_runge_putta(double * xt, void * ODE_pars, double out_data[DAYS][N_PARAMS
 		status = RKF78Sys(&t, xt, CoreModelDIM, &h, &err, HMIN, HMAX, RKTOL, ODE_pars, CoreModel);
 		if (status) return status;
 
+		out_data[ndays] = (double *) malloc(N_PARAMS * sizeof(double));
 		out_data[ndays][0] = xt[4];
 		out_data[ndays][1] = xt[5];
 		out_data[ndays][2] = xt[6];
@@ -100,7 +101,7 @@ int run_runge_putta(double * xt, void * ODE_pars, double out_data[DAYS][N_PARAMS
 }
 
 
-int compute_fitness(Genome * genome, double (* fit_func) (double [DAYS][N_PARAMS])) {
+int compute_fitness(Genome * genome, double (* fit_func) (double **)) {
 	// fit_func(data);
 	IC * ic;
 	ic = (IC *) malloc(sizeof(IC));
@@ -110,17 +111,19 @@ int compute_fitness(Genome * genome, double (* fit_func) (double [DAYS][N_PARAMS
 
 	double xt[CoreModelDIM] = {POP_SIZE, ic->E, ic->I1, ic->A, DATA[0][0], DATA[0][1], DATA[0][2], DATA[0][3]};
 	xt[0] -= (xt[1] + xt[2] + xt[3] + xt[4] + xt[5] + xt[6]);
-	double rk_data[DAYS][5];
+	double ** rk_data;
+	rk_data = (double **) malloc(DAYS * sizeof(double *));
 
 	int status;
 	if ((status = run_runge_putta(xt, params, rk_data))) {
 		// printf("Oh shit, heere we go again! %d\n", status);
-		genome->fitness = 999999999999999999999999999999999.9;
+		genome->fitness = DBL_MAX;
 		return 1;
 	}
 
 	genome->fitness = fit_func(rk_data);
 	free(ic);
 	free(params);
+	free(rk_data);
 	return 0;
 }

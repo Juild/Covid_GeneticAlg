@@ -3,6 +3,9 @@
  * Version 2.2, June 26, 2020. */
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <float.h>
+
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define ABS(x)   ((x) < 0.0 ? -(x) : (x))
