@@ -1,7 +1,4 @@
 # include "sim.h"
-#define HMAX 1.0
-#define HMIN 1.e-3
-#define RKTOL 1.e-5
 
 void phenotype_to_genotype(Genome * genome, IC * c1, Parameters * c2) {
 	c1 -> E = crom2IC(genome -> c1[0]);
@@ -123,5 +120,7 @@ int compute_fitness(Genome * genome, double (* fit_func) (double [DAYS][N_PARAMS
 	}
 
 	genome->fitness = fit_func(rk_data);
+	free(ic);
+	free(params);
 	return 0;
 }

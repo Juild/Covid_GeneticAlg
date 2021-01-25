@@ -5,7 +5,12 @@
 # include "ga.h"
 # include "utils.h"
 
-# define POP_SIZE 1000000
+# define POP_SIZE 1000000.000
+
+#define crom2IC(c) (((double) (c % 1000000000UL))/1000.0) // Initial conditions
+#define crom2HSPar(c) (((double) (c % 1099511627776UL))/1099511627776.0) // High sensitivity
+#define crom2Par(c) (((double) (c % 1048576U))/1048576.0) // Medium sensitivity
+#define crom2LSPar(c) (((double) (c % 1024U))/1024.0) // Low sensitivity
 
 typedef struct IC {
 	double E;

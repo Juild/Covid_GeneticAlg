@@ -7,11 +7,6 @@
 #include <gsl/gsl_math.h>
 #include "utils.h"
 
-#define crom2IC(c) (((double) c)/1000) // Initial conditions
-#define crom2HSPar(c) (((double) c)/1099511627776UL) // High sensitivity
-#define crom2Par(c) (((double) c)/1048576U) // Medium sensitivity
-#define crom2LSPar(c) (((double) c)/1024U) // Low sensitivity
-
 # define GENES_C1 3
 # define GENES_C2 11
 
