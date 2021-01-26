@@ -95,7 +95,7 @@ int compute_fitness(Genome * genome, fitness_func func) {
 
 	int status;
 	double fitness = 0.0;
-	if ((status = run_runge_putta(xt, params, func, &fitness))) {
+	if (xt[0] < 0 || (status = run_runge_putta(xt, params, func, &fitness))) {
 		// printf("Oh shit, heere we go again! %d\n", status);
 		genome->fitness = DBL_MAX;
 		return 1;
