@@ -1,9 +1,14 @@
 # include "sim.h"
 
-void phenotype_to_genotype(Genome * genome, IC * c1, Parameters * c2) {
-	c1 -> E = crom2IC(genome -> c1[0]);
-	c1 -> I1 = crom2IC(genome -> c1[1]);
-	c1 -> A = crom2IC(genome -> c1[2]);
+void genotype_to_phenotype(Genome * genome, double * c1, Parameters * c2) {
+	c1[1] = crom2IC(genome -> c1[0]);
+	c1[2] = crom2IC(genome -> c1[1]);
+	c1[3] = crom2IC(genome -> c1[2]);
+	c1[4] = DATA[0][0];
+	c1[5] = DATA[0][1];
+	c1[6] = DATA[0][2];
+	c1[7] = DATA[0][3];
+	c1[0] = POP_SIZE - (c1[1] + c1[2] + c1[3] + c1[4] + c1[5] + c1[6]);
 
 	c2 -> beta = crom2HSPar(genome -> c2[0]);
 	c2 -> phi = crom2Par(genome -> c2[1]);
@@ -36,7 +41,6 @@ void fitness_max(int day, double * rk_data, double * f) {
 	*f = GSL_MAX(ff, *f);
 }
 
-#define CoreModelDIM 8
 void CoreModel(double t, double * x, unsigned dim, double * der, void * params){
 	Parameters *par = (Parameters *) params; // To simplify the usage of Params (void pointer)
 	double sigmae = par->sigma*x[1], gamma1i1 = par->gamma1*x[2], kappaA = par->kappa*x[3], alphai2 = par->alpha*x[5];
@@ -84,18 +88,16 @@ int run_runge_putta(double * xt, void * ODE_pars, fitness_func func, double * fi
 
 
 int compute_fitness(Genome * genome, fitness_func func) {
-	IC * ic;
-	ic = (IC *) malloc(sizeof(IC));
+	// fit_func(data);
+	double * ic;
+	ic = (double *) malloc(CoreModelDIM * sizeof(double));
 	Parameters * params;
 	params = (Parameters *) malloc(sizeof(Parameters));
-	phenotype_to_genotype(genome, ic, params);
-
-	double xt[CoreModelDIM] = {POP_SIZE, ic->E, ic->I1, ic->A, DATA[0][0], DATA[0][1], DATA[0][2], DATA[0][3]};
-	xt[0] -= (xt[1] + xt[2] + xt[3] + xt[4] + xt[5] + xt[6]);
+	genotype_to_phenotype(genome, ic, params);
 
 	int status;
 	double fitness = 0.0;
-	if (xt[0] < 0 || (status = run_runge_putta(xt, params, func, &fitness))) {
+	if ((status = run_runge_putta(ic, params, func, &fitness))) {
 		// printf("Oh shit, heere we go again! %d\n", status);
 		genome->fitness = DBL_MAX;
 		return 1;
