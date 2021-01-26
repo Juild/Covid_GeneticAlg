@@ -35,18 +35,16 @@ void save_population(Genome * population, int individuals, const char * filename
 
 void save_bestind(Genome * population, int bestindividual){
 	FILE *fp;
-	IC * ic;
-	ic = (IC *) malloc(sizeof(IC));
+	double * ic;
+	ic = (double *) malloc(CoreModelDIM * sizeof(double));
 	Parameters * pbest;
 	pbest = (Parameters *) malloc(sizeof(Parameters));
-	phenotype_to_genotype(population[bestindividual], ic, pbest);
+	genotype_to_phenotype(population + bestindividual, ic, pbest);
 
 	if ((fp = fopen("bestindividual.txt", "w")) != 0)
 		printf("Could not open file");
 
-	fprintf(fp, "fitness: %.8f ,E: %f  ,I_1: %f  ,A: %f \n",
-			population[bestindividual].fitness, ic->E , 
-			ic->I1 ,ic->A );
+	fprintf(fp, "fitness: %.8f ,E: %f  ,I_1: %f  ,A: %f \n", population[bestindividual].fitness, ic[1], ic[2], ic[3]);
 	fprintf(fp, "beta: %.8f  ,phi: %.8f  ,epsilon_i: %.8f \nepsilon_Y: %.8f  ,sigma: %.8f  ,gamma_1: %.8f \ngamma_2: %.8f  ,kappa: %.8f  ,p: %.8f \nalpha: %.8f  ,delta: %.8f",
 				pbest->beta,
 				pbest->phi,
@@ -117,7 +115,7 @@ int main(int argc, char ** argv) {
             temp_population = tmp;
 			++iter;
         }
-        if(iter % (maxiter/100) == 0)printf("Generation %d with fitness %.8f\n", 
+        if(iter % (maxiter/100) == 0)printf("Generation %d with fitness %.8f\n",
         	iter,population[best_individual].fitness);
 	} while(termination == 0);
 
