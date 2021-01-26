@@ -24,24 +24,24 @@ void genotype_to_phenotype(Genome * genome, double * c1, Parameters * c2) {
 }
 
 void fitness_uniform(int day, double * rk_data, double * f) {
-	for (int j = 0; j < N_PARAMS; j++) *f += gsl_pow_uint(rk_data[j] - DATA[day][j], 2);
+	for (int j = 0; j < N_PARAMS; j++) *f += gsl_pow_2(rk_data[j] - DATA[day][j]);
 }
 
 void fitness_linear(int day, double * rk_data, double * f) {
-	for (int j = 0; j < N_PARAMS; j++) *f += day * gsl_pow_uint(rk_data[j] - DATA[day][j], 2);
+	for (int j = 0; j < N_PARAMS; j++) *f += day * gsl_pow_2(rk_data[j] - DATA[day][j]);
 }
 
 void fitness_exp(int day, double * rk_data, double * f) {
-	for (int j = 0; j < N_PARAMS; j++) *f += exp(EXP_NU * day) * gsl_pow_uint(rk_data[j] - DATA[day][j], 2);
+	for (int j = 0; j < N_PARAMS; j++) *f += exp(-EXP_NU * day) * gsl_pow_2(rk_data[j] - DATA[day][j]);
 }
 
 void fitness_max(int day, double * rk_data, double * f) {
 	double ff = 0.0;
-	for (int j = 0; j < N_PARAMS; j++) ff += gsl_pow_uint(rk_data[j] - DATA[day][j], 2);
+	for (int j = 0; j < N_PARAMS; j++) ff += gsl_pow_2(rk_data[j] - DATA[day][j]);
 	*f = GSL_MAX(ff, *f);
 }
 
-void CoreModel(double t, double * x, unsigned dim, double * der, void * params){
+void CoreModel(double t, double * x, unsigned dim, double * der, void * params) {
 	Parameters *par = (Parameters *) params; // To simplify the usage of Params (void pointer)
 	double sigmae = par->sigma*x[1], gamma1i1 = par->gamma1*x[2], kappaA = par->kappa*x[3], alphai2 = par->alpha*x[5];
 	der[0] = par->phi*x[2] + x[3] + (1-par->e1)*(x[4]+x[5]) + (1-par->eY)*x[6];
@@ -63,7 +63,7 @@ int run_runge_putta(double * xt, void * ODE_pars, fitness_func func, double * fi
 	double * rk_data;
 	rk_data = (double *) malloc(N_PARAMS * sizeof(double));
 
-	for (ndays = 1; ndays <= DAYS; ++ndays) {
+	for (ndays = 1; ndays < DAYS; ++ndays) {
 		int status;
 		while (t + h < ndays) {
 			status = RKF78Sys(&t, xt, CoreModelDIM, &h, &err, HMIN, HMAX, RKTOL, ODE_pars, CoreModel);
@@ -97,8 +97,9 @@ int compute_fitness(Genome * genome, fitness_func func) {
 
 	int status;
 	double fitness = 0.0;
-	if ((status = run_runge_putta(ic, params, func, &fitness))) {
-		// printf("Oh shit, heere we go again! %d\n", status);
+	if (ic[0] < 0 || (status = run_runge_putta(ic, params, func, &fitness))) {
+		// if the first ic is negative we can skip the calculation, we know that for sure it is unfeasible
+		printf("Oh shit, heere we go again! %d\n", status);
 		genome->fitness = DBL_MAX;
 		return 1;
 	}
