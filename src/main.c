@@ -35,25 +35,30 @@ void save_population(Genome * population, int individuals, const char * filename
 
 void save_bestind(Genome * population, int bestindividual){
 	FILE *fp;
+	IC * ic;
+	ic = (IC *) malloc(sizeof(IC));
+	Parameters * pbest;
+	pbest = (Parameters *) malloc(sizeof(Parameters));
+	phenotype_to_genotype(population[bestindividual], ic, pbest);
 
 	if ((fp = fopen("bestindividual.txt", "w")) != 0)
 		printf("Could not open file");
 
-	fprintf(fp, "fitness: %.8f ,E: %ld  ,I_1: %ld  ,A: %ld \n",
-			population[bestindividual].fitness, population[bestindividual].c1[0], population[bestindividual].c1[1],
-			population[bestindividual].c1[2]);
-	fprintf(fp, "beta: %ld  ,phi: %ld  ,epsilon_i: %ld \nepsilon_Y: %ld  ,sigma: %ld  ,gamma_1: %ld \ngamma_2: %ld  ,kappa: %ld  ,p: %ld \nalpha: %ld  ,delta: %ld",
-				population[bestindividual].c2[0],
-				population[bestindividual].c2[1],
-				population[bestindividual].c2[2],
-				population[bestindividual].c2[3],
-				population[bestindividual].c2[4],
-				population[bestindividual].c2[5],
-				population[bestindividual].c2[6],
-				population[bestindividual].c2[7],
-				population[bestindividual].c2[8],
-				population[bestindividual].c2[9],
-				population[bestindividual].c2[10]);
+	fprintf(fp, "fitness: %.8f ,E: %f  ,I_1: %f  ,A: %f \n",
+			population[bestindividual].fitness, ic->E , 
+			ic->I1 ,ic->A );
+	fprintf(fp, "beta: %.8f  ,phi: %.8f  ,epsilon_i: %.8f \nepsilon_Y: %.8f  ,sigma: %.8f  ,gamma_1: %.8f \ngamma_2: %.8f  ,kappa: %.8f  ,p: %.8f \nalpha: %.8f  ,delta: %.8f",
+				pbest->beta,
+				pbest->phi,
+				pbest->e1,
+				pbest->eY,
+				pbest->sigma,
+				pbest->gamma1,
+				pbest->gamma2,
+				pbest->kappa,
+				pbest->p,
+				pbest->alpha,
+				pbest->delta);
 
 	fclose(fp);
 
@@ -88,7 +93,6 @@ int main(int argc, char ** argv) {
 
 	printf("Entering genetic algorithm\n");
 	do {
-		if(iter % (maxiter/10) == 0)printf("Generation %d\n", iter);
 	 	// fitness calculates the fitness of every guy in the population
         for (i = 0; i < individuals; i++) // exclude those simulation of repeated genes to speed up simulation!
             if (population[i].fitness < 0) compute_fitness(population + i, fitness_exp);
@@ -113,6 +117,8 @@ int main(int argc, char ** argv) {
             temp_population = tmp;
 			++iter;
         }
+        if(iter % (maxiter/100) == 0)printf("Generation %d with fitness %.8f\n", 
+        	iter,population[best_individual].fitness);
 	} while(termination == 0);
 
 	save_bestind(population,best_individual);

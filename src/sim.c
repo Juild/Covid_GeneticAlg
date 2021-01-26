@@ -22,7 +22,7 @@ double fitness_uniform(double ** solution) {
 	int i, j;
 	double f = 0.0;
 	for (i = 1; i < DAYS; i++)
-		for (j = 0; i < 5; i++)
+		for (j = 0; j < 5; j++)
 			f += gsl_pow_uint(solution[i][j] - DATA[i][j], 2);
 
 	return f;
@@ -32,7 +32,7 @@ double fitness_linear(double ** solution) {
 	int i, j;
 	double f = 0.0;
 	for (i = 1; i < DAYS; i++)
-		for (j = 0; i < 5; i++)
+		for (j = 0; j < 5; j++)
 			f += i * gsl_pow_uint(solution[i][j] - DATA[i][j], 2);
 
 	return f;
@@ -42,7 +42,7 @@ double fitness_exp(double ** solution) {
 	int i, j;
 	double f = 0.0;
 	for (i = 1; i < DAYS; i++)
-		for (j = 0; i < 5; i++)
+		for (j = 0; j < 5; j++)
 			f += exp(EXP_NU * i) * gsl_pow_uint(solution[i][j] - DATA[i][j], 2);
 
 	return f;
@@ -53,7 +53,7 @@ double fitness_max(double ** solution) {
 	double f, max_f = -1;
 	for (i = 1; i < DAYS; i++) {
 		f = 0.0;
-		for (j = 0; i < 5; i++) f += gsl_pow_uint(solution[i][j] - DATA[i][j], 2);
+		for (j = 0; j < 5; j++) f += gsl_pow_uint(solution[i][j] - DATA[i][j], 2);
 		max_f = GSL_MAX(max_f, f);
 	}
 
