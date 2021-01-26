@@ -24,20 +24,41 @@ void genotype_to_phenotype(Genome * genome, double * c1, Parameters * c2) {
 }
 
 void fitness_uniform(int day, double * rk_data, double * f) {
-	for (int j = 0; j < N_PARAMS; j++) *f += gsl_pow_2(rk_data[j] - DATA[day][j]);
+	*f += (
+		gsl_pow_2(rk_data[0] - DATA[day][0]) +
+		gsl_pow_2(rk_data[1] - DATA[day][1]) +
+		gsl_pow_2(rk_data[2] - DATA[day][2]) +
+		gsl_pow_2(rk_data[3] - DATA[day][3]) +
+		gsl_pow_2(rk_data[4] - DATA[day][4])
+	);
 }
 
 void fitness_linear(int day, double * rk_data, double * f) {
-	for (int j = 0; j < N_PARAMS; j++) *f += day * gsl_pow_2(rk_data[j] - DATA[day][j]);
+	*f += day * (
+		gsl_pow_2(rk_data[0] - DATA[day][0]) +
+		gsl_pow_2(rk_data[1] - DATA[day][1]) +
+		gsl_pow_2(rk_data[2] - DATA[day][2]) +
+		gsl_pow_2(rk_data[3] - DATA[day][3]) +
+		gsl_pow_2(rk_data[4] - DATA[day][4])
+	);
 }
 
 void fitness_exp(int day, double * rk_data, double * f) {
-	for (int j = 0; j < N_PARAMS; j++) *f += exp(-EXP_NU * day) * gsl_pow_2(rk_data[j] - DATA[day][j]);
+	*f += exp(-EXP_NU * day) * (
+		gsl_pow_2(rk_data[0] - DATA[day][0]) +
+		gsl_pow_2(rk_data[1] - DATA[day][1]) +
+		gsl_pow_2(rk_data[2] - DATA[day][2]) +
+		gsl_pow_2(rk_data[3] - DATA[day][3]) +
+		gsl_pow_2(rk_data[4] - DATA[day][4])
+	);
 }
 
 void fitness_max(int day, double * rk_data, double * f) {
-	double ff = 0.0;
-	for (int j = 0; j < N_PARAMS; j++) ff += gsl_pow_2(rk_data[j] - DATA[day][j]);
+	double ff = gsl_pow_2(rk_data[0] - DATA[day][0]) +
+				gsl_pow_2(rk_data[1] - DATA[day][1]) +
+				gsl_pow_2(rk_data[2] - DATA[day][2]) +
+				gsl_pow_2(rk_data[3] - DATA[day][3]) +
+				gsl_pow_2(rk_data[4] - DATA[day][4]);
 	*f = GSL_MAX(ff, *f);
 }
 
@@ -99,7 +120,7 @@ int compute_fitness(Genome * genome, fitness_func func) {
 	double fitness = 0.0;
 	if (ic[0] < 0 || (status = run_runge_putta(ic, params, func, &fitness))) {
 		// if the first ic is negative we can skip the calculation, we know that for sure it is unfeasible
-		printf("Oh shit, heere we go again! %d\n", status);
+		// printf("Oh shit, heere we go again! %d\n", status);
 		genome->fitness = DBL_MAX;
 		return 1;
 	}
