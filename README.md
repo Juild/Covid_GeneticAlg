@@ -3,7 +3,7 @@ Fitting a complex model of Covid-19 with Genetic Algorithms and Runge Kutta
 
 ## Install and build
 
-To build the executable you will need to install the gsl and gsl-blas library: `sudo apt install libgsl-dev`.
+To build the executable you will need to install the gsl and gsl-blas library: `sudo apt install libgsl-dev libomp-dev`.
 
 Maybe you'll also need cmake to compile the files: `sudo apt install cmake`.
 

@@ -34,7 +34,8 @@ target_include_directories(covidga PUBLIC src)
 # This defines the variables Boost_LIBRARIES that containts all library names
 # that we need to link into the program.
 find_package(GSL REQUIRED)
-target_link_libraries(covidga PUBLIC m GSL::gsl GSL::gslcblas)
+find_package(OpenMP REQUIRED)
+target_link_libraries(covidga PUBLIC m GSL::gsl GSL::gslcblas OpenMP::OpenMP_C)
 
 ###############################################################################
 ## testing ####################################################################
