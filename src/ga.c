@@ -150,6 +150,25 @@ void crossover_genomes(
  * @param number_elitism the number of best individuals to be selected
  * @param out the population to be filled with the best individuals
  */
+
+int extinction(int ek, Genome * population, Genome * survivors, int pop_size, int number_survivors){
+
+	ek=0;
+
+	int new_population =pop_size-number_survivors;
+
+	elitism(population,pop_size, number_survivors,survivors);
+
+	migration(survivors+number_survivors,new_population);
+
+	return ek;
+
+}
+
+
+
+
+
 void elitism(Genome * population, int pop_size, int number_elitism, Genome * out) {
 	int i, j;
 	int best_index[number_elitism];

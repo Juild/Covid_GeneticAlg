@@ -54,6 +54,13 @@ void mutate_genome(Genome * genome, double p_mut);
  *
  * @return the position of the best individual
  */
+
+
+int extinction(int ek, Genome * population, Genome * survivors, int pop_size, int number_survivors);
+
+
+
+
 void elitism(Genome * population, int pop_size, int number_elitism, Genome * out);
 
 /*
