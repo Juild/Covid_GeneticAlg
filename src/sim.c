@@ -23,49 +23,46 @@ void genotype_to_phenotype(Genome * genome, double * c1, Parameters * c2) {
 	c2 -> delta = crom2HSPar(genome -> c2[10]);
 }
 
-double fitness_uniform(double ** solution) {
-	int i, j;
-	double f = 0.0;
-	for (i = 1; i < DAYS; i++)
-		for (j = 0; j < 5; j++)
-			f += gsl_pow_uint(solution[i][j] - DATA[i][j], 2);
-
-	return f;
+void fitness_uniform(int day, double * rk_data, double * f) {
+	*f += (
+		gsl_pow_2(rk_data[0] - DATA[day][0]) +
+		gsl_pow_2(rk_data[1] - DATA[day][1]) +
+		gsl_pow_2(rk_data[2] - DATA[day][2]) +
+		gsl_pow_2(rk_data[3] - DATA[day][3]) +
+		gsl_pow_2(rk_data[4] - DATA[day][4])
+	);
 }
 
-double fitness_linear(double ** solution) {
-	int i, j;
-	double f = 0.0;
-	for (i = 1; i < DAYS; i++)
-		for (j = 0; j < 5; j++)
-			f += i * gsl_pow_uint(solution[i][j] - DATA[i][j], 2);
-
-	return f;
+void fitness_linear(int day, double * rk_data, double * f) {
+	*f += day * (
+		gsl_pow_2(rk_data[0] - DATA[day][0]) +
+		gsl_pow_2(rk_data[1] - DATA[day][1]) +
+		gsl_pow_2(rk_data[2] - DATA[day][2]) +
+		gsl_pow_2(rk_data[3] - DATA[day][3]) +
+		gsl_pow_2(rk_data[4] - DATA[day][4])
+	);
 }
 
-double fitness_exp(double ** solution) {
-	int i, j;
-	double f = 0.0;
-	for (i = 1; i < DAYS; i++)
-		for (j = 0; j < 5; j++)
-			f += exp(EXP_NU * i) * gsl_pow_uint(solution[i][j] - DATA[i][j], 2);
-
-	return f;
+void fitness_exp(int day, double * rk_data, double * f) {
+	*f += exp(-EXP_NU * day) * (
+		gsl_pow_2(rk_data[0] - DATA[day][0]) +
+		gsl_pow_2(rk_data[1] - DATA[day][1]) +
+		gsl_pow_2(rk_data[2] - DATA[day][2]) +
+		gsl_pow_2(rk_data[3] - DATA[day][3]) +
+		gsl_pow_2(rk_data[4] - DATA[day][4])
+	);
 }
 
-double fitness_max(double ** solution) {
-	int i, j;
-	double f, max_f = -1;
-	for (i = 1; i < DAYS; i++) {
-		f = 0.0;
-		for (j = 0; j < 5; j++) f += gsl_pow_uint(solution[i][j] - DATA[i][j], 2);
-		max_f = GSL_MAX(max_f, f);
-	}
-
-	return max_f;
+void fitness_max(int day, double * rk_data, double * f) {
+	double ff = gsl_pow_2(rk_data[0] - DATA[day][0]) +
+				gsl_pow_2(rk_data[1] - DATA[day][1]) +
+				gsl_pow_2(rk_data[2] - DATA[day][2]) +
+				gsl_pow_2(rk_data[3] - DATA[day][3]) +
+				gsl_pow_2(rk_data[4] - DATA[day][4]);
+	*f = GSL_MAX(ff, *f);
 }
 
-void CoreModel(double t, double * x, unsigned dim, double * der, void * params){
+void CoreModel(double t, double * x, unsigned dim, double * der, void * params) {
 	Parameters *par = (Parameters *) params; // To simplify the usage of Params (void pointer)
 	double sigmae = par->sigma*x[1], gamma1i1 = par->gamma1*x[2], kappaA = par->kappa*x[3], alphai2 = par->alpha*x[5];
 	der[0] = par->phi*x[2] + x[3] + (1-par->e1)*(x[4]+x[5]) + (1-par->eY)*x[6];
@@ -80,10 +77,14 @@ void CoreModel(double t, double * x, unsigned dim, double * der, void * params){
 }
 
 
-int run_runge_putta(double * xt, void * ODE_pars, double ** out_data) {
+int run_runge_putta(double * xt, void * ODE_pars, fitness_func func, double * fitness) {
 	register int ndays;
 	double t = 0.0, err, h = 1.e-3;
-	for (ndays = 1; ndays <= DAYS; ++ndays) {
+
+	double * rk_data;
+	rk_data = (double *) malloc(N_PARAMS * sizeof(double));
+
+	for (ndays = 1; ndays < DAYS; ++ndays) {
 		int status;
 		while (t + h < ndays) {
 			status = RKF78Sys(&t, xt, CoreModelDIM, &h, &err, HMIN, HMAX, RKTOL, ODE_pars, CoreModel);
@@ -93,19 +94,21 @@ int run_runge_putta(double * xt, void * ODE_pars, double ** out_data) {
 		status = RKF78Sys(&t, xt, CoreModelDIM, &h, &err, HMIN, HMAX, RKTOL, ODE_pars, CoreModel);
 		if (status) return status;
 
-		out_data[ndays] = (double *) malloc(N_PARAMS * sizeof(double));
-		out_data[ndays][0] = xt[4];
-		out_data[ndays][1] = xt[5];
-		out_data[ndays][2] = xt[6];
-		out_data[ndays][3] = xt[7];
-		out_data[ndays][4] = POP_SIZE - (xt[0]+xt[1]+xt[2]+xt[3]+xt[4]+xt[5]+xt[6]+xt[7]);
+		rk_data[0] = xt[4];
+		rk_data[1] = xt[5];
+		rk_data[2] = xt[6];
+		rk_data[3] = xt[7];
+		rk_data[4] = POP_SIZE - (xt[0]+xt[1]+xt[2]+xt[3]+xt[4]+xt[5]+xt[6]+xt[7]);
+		func(ndays, rk_data, fitness);
 	}
+
+	free(rk_data);
 
 	return 0;
 }
 
 
-int compute_fitness(Genome * genome, double (* fit_func) (double **)) {
+int compute_fitness(Genome * genome, fitness_func func) {
 	// fit_func(data);
 	double * ic;
 	ic = (double *) malloc(CoreModelDIM * sizeof(double));
@@ -113,19 +116,17 @@ int compute_fitness(Genome * genome, double (* fit_func) (double **)) {
 	params = (Parameters *) malloc(sizeof(Parameters));
 	genotype_to_phenotype(genome, ic, params);
 
-	double ** rk_data;
-	rk_data = (double **) malloc(DAYS * sizeof(double *));
-
 	int status;
-	if ((status = run_runge_putta(ic, params, rk_data))) {
+	double fitness = 0.0;
+	if (ic[0] < 0 || (status = run_runge_putta(ic, params, func, &fitness))) {
+		// if the first ic is negative we can skip the calculation, we know that for sure it is unfeasible
 		// printf("Oh shit, heere we go again! %d\n", status);
 		genome->fitness = DBL_MAX;
 		return 1;
 	}
 
-	genome->fitness = fit_func(rk_data);
+	genome->fitness = fitness;
 	free(ic);
 	free(params);
-	free(rk_data);
 	return 0;
 }

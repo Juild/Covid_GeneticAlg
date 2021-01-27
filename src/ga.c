@@ -1,10 +1,25 @@
 #include "ga.h"
 
+# define UL_SIZE sizeof(unsigned long)
+
 void generate_genome(Genome * genome) {
 	//generating initial states for chromosome 1
-	for (int i = 0; i < GENES_C1; i++) genome -> c1[i] = random_ulong();
+	genome -> c1[0] = random_ulong();
+	genome -> c1[1] = random_ulong();
+	genome -> c1[2] = random_ulong();
 	//generating initial states for chromosome 2
-	for (int i = 0; i < GENES_C2; i++) genome -> c2[i] = random_ulong();
+	genome -> c2[0] = random_ulong();
+	genome -> c2[1] = random_ulong();
+	genome -> c2[2] = random_ulong();
+	genome -> c2[3] = random_ulong();
+	genome -> c2[4] = random_ulong();
+	genome -> c2[5] = random_ulong();
+	genome -> c2[6] = random_ulong();
+	genome -> c2[7] = random_ulong();
+	genome -> c2[8] = random_ulong();
+	genome -> c2[9] = random_ulong();
+	genome -> c2[10] = random_ulong();
+
 	genome->fitness = -1;
 }
 
@@ -14,7 +29,8 @@ Genome * generate_population(int individuals) {
 	if( (population = (Genome *) malloc(individuals * sizeof(Genome)))== NULL )
 		exit_error("when allocating memory for the population",13);
 
-	for(int i = 0; i < individuals; i++) generate_genome(population + i);
+	// TODO: parallel
+	for (int i = 0; i < individuals; i++) generate_genome(population + i);
 
 	printf("Population of %d generated \n",individuals);
 	return population;
@@ -32,19 +48,27 @@ void tinder(Genome * population, int pop_size, Genome * last_individual) { //Sup
 //genetic functions
 int bitwise_mutation(unsigned long *f, double prob) {
 	if (random_double() < prob) {
-		*f = (*f)^(1U << ((unsigned char) random_double()*8*sizeof(*f)));
+		*f = (*f)^(1U << random_int(UL_SIZE));
 		return 1;
 	}
 	return 0;
 }
 
 void mutate_genome(Genome * genome, double prob) {
-	int i;
-	for (i = 0; i < GENES_C1; i++)
-		if (bitwise_mutation(genome->c1 + i, prob)) // gen `i` has been mutate, so reset fitness to default
-			genome->fitness = -1;
-	for (i = 0; i < GENES_C2; i++)
-		if (bitwise_mutation(genome->c2 + i, prob)) // gen `i` has been mutate, so reset fitness to default
+	if (bitwise_mutation(genome->c1, prob)
+		+ bitwise_mutation(genome->c1 + 1, prob)
+		+ bitwise_mutation(genome->c1 + 2, prob)
+		+ bitwise_mutation(genome->c2, prob)
+		+ bitwise_mutation(genome->c2 + 1, prob)
+		+ bitwise_mutation(genome->c2 + 2, prob)
+		+ bitwise_mutation(genome->c2 + 3, prob)
+		+ bitwise_mutation(genome->c2 + 4, prob)
+		+ bitwise_mutation(genome->c2 + 5, prob)
+		+ bitwise_mutation(genome->c2 + 6, prob)
+		+ bitwise_mutation(genome->c2 + 7, prob)
+		+ bitwise_mutation(genome->c2 + 8, prob)
+		+ bitwise_mutation(genome->c2 + 9, prob)
+		+ bitwise_mutation(genome->c2 + 10, prob)) // gen `i` has been mutate, so reset fitness to default
 			genome->fitness = -1;
 }
 
@@ -70,28 +94,48 @@ void crossover_genomes(
 	Genome * gen2out
 ) {
 	// cross initial conditions
-	int i;
-	int val = random_int(GENES_C1 + GENES_C2);
-	for (i = 0; i < GENES_C1; i++) {
-		if (i < val) { // copy as is
-			gen1out->c1[i] = gen1in->c1[i];
-			gen2out->c1[i] = gen2in->c1[i];
-		} else {
-			gen1out->c1[i] = gen2in->c1[i];
-			gen2out->c1[i] = gen1in->c1[i];
-		}
-	}
+	// int i;
+	int val = random_int(GENES_C1 + GENES_C2 - 1) + 1;
+	if (val < GENES_C1) {
+		// crossover in the first chromosome
+		memcpy(gen1out->c1, gen1in->c1, val * UL_SIZE);
+		memcpy(gen2out->c1, gen2in->c1, val * UL_SIZE);
+		memcpy(gen1out->c1, gen2in->c1, (GENES_C1 - val) * UL_SIZE);
+		memcpy(gen2out->c1, gen1in->c1, (GENES_C1 - val) * UL_SIZE);
 
-	val -= GENES_C2;
-	for (i = 0; i < GENES_C2; i++) {
-		if (i < val) { // copy as is
-			gen1out->c2[i] = gen1in->c2[i];
-			gen2out->c2[i] = gen2in->c2[i];
-		} else {
-			gen1out->c2[i] = gen2in->c2[i];
-			gen2out->c2[i] = gen1in->c2[i];
-		}
+		memcpy(gen1out->c2, gen2in->c2, GENES_C2 * UL_SIZE);
+		memcpy(gen2out->c2, gen1in->c2, GENES_C2 * UL_SIZE);
+	} else {
+		// crossover in the 2nd chromosome
+		memcpy(gen1out->c1, gen1in->c1, GENES_C1 * UL_SIZE);
+		memcpy(gen2out->c1, gen2in->c1, GENES_C1 * UL_SIZE);
+
+		val -= GENES_C1;
+		memcpy(gen1out->c2, gen1in->c2, val * UL_SIZE);
+		memcpy(gen2out->c2, gen2in->c2, val * UL_SIZE);
+		memcpy(gen1out->c2, gen2in->c2, (GENES_C2 - val) * UL_SIZE);
+		memcpy(gen2out->c2, gen1in->c2, (GENES_C2 - val) * UL_SIZE);
 	}
+	// for (i = 0; i < GENES_C1; i++) {
+	// 	if (i < val) { // copy as is
+	// 		gen1out->c1[i] = gen1in->c1[i];
+	// 		gen2out->c1[i] = gen2in->c1[i];
+	// 	} else {
+	// 		gen1out->c1[i] = gen2in->c1[i];
+	// 		gen2out->c1[i] = gen1in->c1[i];
+	// 	}
+	// }
+	//
+	// val -= GENES_C1;
+	// for (i = 0; i < GENES_C2; i++) {
+	// 	if (i < val) { // copy as is
+	// 		gen1out->c2[i] = gen1in->c2[i];
+	// 		gen2out->c2[i] = gen2in->c2[i];
+	// 	} else {
+	// 		gen1out->c2[i] = gen2in->c2[i];
+	// 		gen2out->c2[i] = gen1in->c2[i];
+	// 	}
+	// }
 
 	gen1out->fitness = -1;
 	gen2out->fitness = -1;
@@ -144,17 +188,16 @@ int casting(Genome * population, int pop_size, int best_genomes, Genome * out) {
 
 	int i, j, best_index;
 	p_cumsum[0] = 1.0 / population[0].fitness;
-	sum_p = p_cumsum[0];
 	for (i = 1; i < pop_size; i++) {
 		p = 1.0 / population[i].fitness;
 		p_cumsum[i] = p_cumsum[i - 1] + p;
-		sum_p += p;
 		if (p > best_p) {
 			best_p = p;
 			best_index = i;
 		}
 	}
 	//normalise
+	sum_p = p_cumsum[pop_size - 1];
 	for (i = 0; i < pop_size; i++) p_cumsum[i] /= sum_p;
 
 	for (i = 0; i < best_genomes; i++) {
@@ -181,8 +224,8 @@ void migration(
  * Note that the fitness function is also copied over.
  */
 void copy_genome(Genome * in, Genome * out) {
-	memcpy(out->c1, in->c1, GENES_C1 * sizeof(double));
-	memcpy(out->c2, in->c2, GENES_C2 * sizeof(double));
+	memcpy(out->c1, in->c1, GENES_C1 * UL_SIZE);
+	memcpy(out->c2, in->c2, GENES_C2 * UL_SIZE);
 	out->fitness = in->fitness;
 }
 
@@ -213,6 +256,7 @@ int next_generation(
 
 	// mutations mutate a bit some people so a bit of randomness is included
 	// exclude elitist from mutation! this is rather artificial
+	// TODO: parallel
 	if (p_mutation > 0) for (i = n_elitism; i < pop_size - n_new; i++) mutate_genome(children + i, p_mutation);
 
 	if (n_new > 0) migration(children + (pop_size - n_new), n_new);
