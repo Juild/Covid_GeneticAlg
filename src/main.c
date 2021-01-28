@@ -2,6 +2,7 @@
 # include "sim.h"
 # include "ga.h"
 # include "utils.h"
+#include <omp.h>
 
 /*
  * Just for statistic purposes.
@@ -72,7 +73,10 @@ int main(int argc, char ** argv) {
 
 
 	int individuals = 500;
+	if(argc > 1) individuals = atoi(argv[1]);
 	int maxiter = 2000; // ficar la possibilitat de donarho en runtime
+	if(argc > 2) maxiter = atoi(argv[2]);
+	printf("Initializing with %d individuals and %d maxiter\n", individuals, maxiter);
 	int termination=0;
 	int iter=0;
 	double fitness_threshold = 1;
@@ -110,6 +114,7 @@ int main(int argc, char ** argv) {
 	printf("Entering genetic algorithm\n");
 	do {
 	 	// fitness calculates the fitness of every guy in the population
+		#pragma omp parallel for
         for (i = 0; i < individuals; i++) // exclude those simulation of repeated genes to speed up simulation!
             if (population[i].fitness < 0) compute_fitness(population + i, ff); // TODO: parallel
 
