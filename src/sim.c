@@ -24,7 +24,7 @@ void genotype_to_phenotype(Genome * genome, double * c1, Parameters * c2) {
 }
 
 void fitness_uniform(int day, double * rk_data, double * f) {
-	*f += (
+	*f += NORM_UNIFORM * (
 		gsl_pow_2(rk_data[0] - DATA[day][0]) +
 		gsl_pow_2(rk_data[1] - DATA[day][1]) +
 		gsl_pow_2(rk_data[2] - DATA[day][2]) +
@@ -34,7 +34,7 @@ void fitness_uniform(int day, double * rk_data, double * f) {
 }
 
 void fitness_linear(int day, double * rk_data, double * f) {
-	*f += day * (
+	*f += NORM_LINEAR * day * (
 		gsl_pow_2(rk_data[0] - DATA[day][0]) +
 		gsl_pow_2(rk_data[1] - DATA[day][1]) +
 		gsl_pow_2(rk_data[2] - DATA[day][2]) +
@@ -44,7 +44,7 @@ void fitness_linear(int day, double * rk_data, double * f) {
 }
 
 void fitness_exp(int day, double * rk_data, double * f) {
-	*f += exp(-EXP_NU * day) * (
+	*f += NORM_EXP * exp(-EXP_NU * day) * (
 		gsl_pow_2(rk_data[0] - DATA[day][0]) +
 		gsl_pow_2(rk_data[1] - DATA[day][1]) +
 		gsl_pow_2(rk_data[2] - DATA[day][2]) +

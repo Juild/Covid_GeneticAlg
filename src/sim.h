@@ -60,6 +60,9 @@ int compute_fitness(Genome * genome, fitness_func ff);
 int evolve(double * x, void * params, fitness_func ff, double * fitness);
 
 # define EXP_NU 0.05
+# define NORM_UNIFORM 0.01
+# define NORM_LINEAR 0.00019802			 // 1 over n(n + 1)/2
+# define NORM_EXP 0.0003308427537690123  // evaluated for nu = 0.05, 1 over (1 - exp(nu*(N + 1)) / (1 - exp(nu)))
 void fitness_uniform(int, double *, double *);
 void fitness_linear(int, double *, double *);
 void fitness_exp(int, double *, double *);

@@ -88,11 +88,12 @@ int main(int argc, char ** argv) {
 	int extinc_selection = 200;
 	int extinc_cross     = individuals - number_survivors - extinc_migration - extinc_selection;
 
-
 	Genome * population;
 	Genome * temp_population;
 	temp_population = (Genome *) malloc(individuals * sizeof(Genome));
 
+	fitness_func ff;
+	ff = fitness_exp;
 
 	int ek = 0;
 	int recovery = cooldown + 1 ;
@@ -110,39 +111,37 @@ int main(int argc, char ** argv) {
 	do {
 	 	// fitness calculates the fitness of every guy in the population
         for (i = 0; i < individuals; i++) // exclude those simulation of repeated genes to speed up simulation!
-            if (population[i].fitness < 0) compute_fitness(population + i, fitness_exp); // TODO: parallel
+            if (population[i].fitness < 0) compute_fitness(population + i, ff); // TODO: parallel
 
 		// save_population(population, individuals, "step_" + i); pero esta bé
 
 		// elitism takes the x bests and puts them to the new generation
-		
-		if(recovery < cooldown){
+
+		// TODO: change the fitness by setting the value of ff to any of fitness_exp, fitness_max...
+
+		if (recovery < cooldown) {
 			best_individual = next_generation(population, temp_population,
                                           	number_survivors, extinc_selection, extinc_cross, extinc_migration, 0.1);
 			recovery++;
 			//if(iter % (maxiter/100) == 0)printf("Entering cooldown if\n");
 			fitness_temp=population[best_individual].fitness;
 
-		}
-
-		else{
+		} else {
         	int rdn=random_int(extinction_period);
-        	if(rdn < ek){
+        	if (rdn < ek) {
         		recovery=0;
         		ek = extinction( ek, population, temp_population, individuals, number_survivors);
         		printf("An extinction has occurred\n");
         		init_rng();
-        	}
-			else{
+        	} else {
 				best_individual = next_generation(population, temp_population,
                                           		number_elitism, number_selection, number_crossover, number_migration, 0.3);
 				//if(iter % (maxiter/100) == 0)printf("normal behaviour, values %.8f,%.8f\n",population[best_individual].fitness,fitness_temp);
 
-				if((abs(population[best_individual].fitness -fitness_temp) < epsilon )||((population[best_individual].fitness -fitness_temp)==0)) ek++;
+				if ((abs(population[best_individual].fitness -fitness_temp) < epsilon )||((population[best_individual].fitness -fitness_temp)==0)) ek++;
 				fitness_temp=population[best_individual].fitness;
 			}
 		}
-		
 
 		if(iter % (maxiter/100) == 0)
 			printf("Generation %d with fitness %.8f and ek%d\n",
