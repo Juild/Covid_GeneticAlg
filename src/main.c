@@ -4,6 +4,7 @@
 # include "ga.h"
 # include "gradient.h"
 # include "utils.h"
+#include <omp.h>
 
 /*
  * Just for statistic purposes.
@@ -46,8 +47,8 @@ void save_bestind(Genome * population, int bestindividual){
 	if ((fp = fopen("bestindividual.txt", "w")) != 0)
 		printf("Could not open file");
 
-	fprintf(fp, "fitness: %.8f ,E: %f  ,I_1: %f  ,A: %f \n", population[bestindividual].fitness, ic[1], ic[2], ic[3]);
-	fprintf(fp, "beta: %.8f  ,phi: %.8f  ,epsilon_i: %.8f \nepsilon_Y: %.8f  ,sigma: %.8f  ,gamma_1: %.8f \ngamma_2: %.8f  ,kappa: %.8f  ,p: %.8f \nalpha: %.8f  ,delta: %.8f",
+	fprintf(fp, "fitness: %.16f ,E: %.16f  ,I_1: %.16f  ,A: %.16f \n", population[bestindividual].fitness, ic[1], ic[2], ic[3]);
+	fprintf(fp, "beta: %.16f  ,phi: %.16f  ,epsilon_i: %.16f \nepsilon_Y: %.16f  ,sigma: %.16f  ,gamma_1: %.16f \ngamma_2: %.16f  ,kappa: %.16f  ,p: %.16f \nalpha: %.16f  ,delta: %.16f",
 				pbest->beta,
 				pbest->phi,
 				pbest->e1,
@@ -60,6 +61,7 @@ void save_bestind(Genome * population, int bestindividual){
 				pbest->alpha,
 				pbest->delta);
 
+	store_trajectory(ic, pbest, fp);
 	fclose(fp);
 
 
@@ -68,8 +70,11 @@ void save_bestind(Genome * population, int bestindividual){
 // Main Function //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char ** argv) {
-	int individuals = 1000;
-	int maxiter = 10000; // ficar la possibilitat de donarho en runtime
+	int individuals = 500;
+	if(argc > 1) individuals = atoi(argv[1]);
+	int maxiter = 2000; // ficar la possibilitat de donarho en runtime
+	if(argc > 2) maxiter = atoi(argv[2]);
+	printf("Initializing with %d individuals and %d maxiter\n", individuals, maxiter);
 	int termination=0;
 	int iter=0;
 	double fitness_threshold = 1;

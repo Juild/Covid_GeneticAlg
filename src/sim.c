@@ -106,6 +106,31 @@ int run_runge_putta(double * xt, void * ODE_pars, fitness_func func, double * fi
 
 	return 0;
 }
+int store_trajectory(double * xt, void * ODE_pars, FILE *outfile) {
+	register int ndays;
+	double t = 0.0, err, h = 1.e-3;
+	fprintf(outfile, "\nA_d\tI_2\tY\tR\tD\n");
+
+	for (ndays = 1; ndays < DAYS; ++ndays) {
+		int status;
+		while (t + h < ndays) {
+			status = RKF78Sys(&t, xt, CoreModelDIM, &h, &err, HMIN, HMAX, RKTOL, ODE_pars, CoreModel);
+			if (status) return status;
+		}
+		h = ndays - t;
+		status = RKF78Sys(&t, xt, CoreModelDIM, &h, &err, HMIN, HMAX, RKTOL, ODE_pars, CoreModel);
+		if (status) return status;
+
+		fprintf(outfile, "%.16f,", xt[4]); //A_d
+		fprintf(outfile, "%.16f,", xt[5]);
+		fprintf(outfile, "%.16f,", xt[6]);
+		fprintf(outfile, "%.16f,", xt[7]);
+		fprintf(outfile, "%.16f,", xt[6]);
+		fprintf(outfile, "%.16f,", xt[6]);
+		fprintf(outfile, "%.16f\n",  POP_SIZE - (xt[0]+xt[1]+xt[2]+xt[3]+xt[4]+xt[5]+xt[6]+xt[7]));
+	}
+	return 0;
+}
 
 
 int compute_fitness(Genome * genome, fitness_func func) {
