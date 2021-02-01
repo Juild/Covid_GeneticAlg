@@ -59,6 +59,8 @@ int compute_fitness(Genome * genome, fitness_func ff);
  */
 int evolve(double * x, void * params, fitness_func ff, double * fitness);
 
+int run_runge_putta(double * xt, void * ODE_pars, fitness_func func, double * fitness);
+
 # define EXP_NU 0.05
 # define NORM_UNIFORM 0.01
 # define NORM_LINEAR 0.00019802			 // 1 over n(n + 1)/2
