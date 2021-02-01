@@ -194,11 +194,11 @@ void elitism(Genome * population, int pop_size, int number_elitism, Genome * out
  */
 int casting(Genome * population, int pop_size, int best_genomes, Genome * out) {
 	// roulette wheeeeeeeel
-	double sum_p, * p_cumsum, p, best_p = -1;
+	double sum_p, * p_cumsum, p, best_p;
 	p_cumsum = (double *) malloc(pop_size * sizeof(double));
 
-	int i, j, best_index;
-	p_cumsum[0] = 1.0 / population[0].fitness;
+	int i, j, best_index = 0;
+	p_cumsum[0] = best_p = 1.0 / population[0].fitness;
 	for (i = 1; i < pop_size; i++) {
 		p = 1.0 / population[i].fitness;
 		p_cumsum[i] = p_cumsum[i - 1] + p;
