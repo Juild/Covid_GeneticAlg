@@ -183,8 +183,8 @@ void __fitness_f_gradient(
  * Returns 1 if the optimisation could decrease the fidelity.
  */
 int optimise_parameters(Genome * genome, fitness_func func) {
-    gsl_vector * v = gsl_vector_alloc(GRADIENT_DIM);
-    __genotype_to_gsl_vector(genome, v);
+    gsl_vector * v = gsl_vector_alloc(GRADIENT_DIM); // this vector will allocated the optimised parameters
+    __genotype_to_gsl_vector(genome, v); // it is initialised with the parameters from the genome
 
     int status, iter = 0;
 
@@ -207,12 +207,15 @@ int optimise_parameters(Genome * genome, fitness_func func) {
         status = gsl_multimin_fdfminimizer_iterate(s);
         if (status) break;
         status = gsl_multimin_test_gradient(s->gradient, 1e-3);
-    } while (status == GSL_CONTINUE && iter < GRADIENT_MAX_ITERS); 
+    } while (status == GSL_CONTINUE && iter < GRADIENT_MAX_ITERS);
 
     if (s->f < genome->fitness) {
         printf("Optimising the genome decreased the fidelity from %.2f to %.2f\n", genome->fitness, s->f);
         genome->fitness = s->f;
         __gsl_vector_to_genotype(genome, v);
+
+        gsl_multimin_fdfminimizer_free(s);
+        gsl_vector_free(v);
         return 1;
     }
 
