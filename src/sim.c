@@ -132,7 +132,7 @@ int store_trajectory(double * xt, void * ODE_pars, FILE *outfile) {
 		fprintf(outfile, "%.16f,", xt[1]);
 		fprintf(outfile, "%.16f,", xt[2]);
 		fprintf(outfile, "%.16f,", xt[3]);
-		fprintf(outfile, "%.16f,", xt[4]); //A_d
+		fprintf(outfile, "%.16f,", xt[4]); // A_d
 		fprintf(outfile, "%.16f,", xt[5]);
 		fprintf(outfile, "%.16f,", xt[6]);
 		fprintf(outfile, "%.16f\n", xt[7]);

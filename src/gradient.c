@@ -205,8 +205,8 @@ int optimise_parameters(Genome * genome, fitness_func func) {
     do {
         iter++;
         status = gsl_multimin_fdfminimizer_iterate(s);
-        if (status) break;
-        status = gsl_multimin_test_gradient(s->gradient, 1e-3);
+        // if (status) break;
+        // status = gsl_multimin_test_gradient(s->gradient, 1e-3);
     } while (status == GSL_CONTINUE && iter < GRADIENT_MAX_ITERS);
 
     if (s->f < genome->fitness) {

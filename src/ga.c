@@ -248,23 +248,16 @@ int elitist_casting(Genome * population, int pop_size, int best_genomes, int num
 	for (i = 0; i < pop_size; i++) p_cumsum[i] /= p;
 
 	// copy the best individuals to the out population
-	int best_of_the_best = -1;
-	p = DBL_MAX;
-	for (j = 0; j < number_elitism; j++) {
-		copy_genome(population + best_indices[j], out + j);
-		if (population[best_indices[j]].fitness < p) {
-			best_of_the_best = best_indices[j];
-			p = population[best_indices[j]].fitness;
-		}
-	}
+	for (j = 0; j < number_elitism; j++) copy_genome(population + best_indices[j], out + j);
 
 	for (i = 0; i < best_genomes; i++) {
 		p = random_double();
 		for (j = 0; j < pop_size; j++) if (p <= p_cumsum[j]) break;
-		copy_genome(population + j, out + i);
+		copy_genome(population + j, out + i + number_elitism);
 	}
 
-	return best_of_the_best;
+	// by how we calculated this array, the best is guaranteed to be in the first position
+	return best_indices[0];
 }
 
 /*
