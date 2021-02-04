@@ -220,6 +220,53 @@ int casting(Genome * population, int pop_size, int best_genomes, Genome * out) {
 	return best_index;
 }
 
+/* Does casting and elitism all at once to avoid double loops */
+int elitist_casting(Genome * population, int pop_size, int best_genomes, int number_elitism, Genome * out) {
+	// roulette wheeeeeeeel
+	register int i, j;
+	double * p_cumsum, p;
+	p_cumsum = (double *) malloc(pop_size * sizeof(double));
+
+	int best_indices[number_elitism];
+
+	// initialise the list of best individuals arbitrarialy to the first individuals of the previous population
+	for (j = 0; j < number_elitism; j++) best_indices[j] = j;
+
+	p_cumsum[0] = 1.0 / population[0].fitness;
+	for (i = 1; i < pop_size; i++) {
+		p = 1.0 / population[i].fitness;
+		p_cumsum[i] = p_cumsum[i - 1] + p;
+		for (j = 0; j < number_elitism; j++)
+			if (population[best_indices[j]].fitness > population[i].fitness) {
+				// we have found a better one at index i, so add it to the list of best individuals
+				best_indices[j] = i; break;
+			}
+	}
+
+	//normalise
+	p = p_cumsum[pop_size - 1];
+	for (i = 0; i < pop_size; i++) p_cumsum[i] /= p;
+
+	// copy the best individuals to the out population
+	int best_of_the_best = -1;
+	p = DBL_MAX;
+	for (j = 0; j < number_elitism; j++) {
+		copy_genome(population + best_indices[j], out + j);
+		if (population[best_indices[j]].fitness < p) {
+			best_of_the_best = best_indices[j];
+			p = population[best_indices[j]].fitness;
+		}
+	}
+
+	for (i = 0; i < best_genomes; i++) {
+		p = random_double();
+		for (j = 0; j < pop_size; j++) if (p <= p_cumsum[j]) break;
+		copy_genome(population + j, out + i);
+	}
+
+	return best_of_the_best;
+}
+
 /*
  * Add `n_new` individuals to the start of the passed genome array.
  */
@@ -250,11 +297,11 @@ int next_generation(
 	if (n_cross % 2 == 1) // ensure ǹumber of crossover is even
 		exit_error("Please define the crossover number as even!", 33);
 
-	// elitism takes the x bests and puts them to the new generation
-	if (n_elitism > 0) elitism(parents, pop_size, n_elitism, children);
-
-	// casting selects the best individuals randomly by fitness
-	int best_individual = casting(parents, pop_size, n_select, children + n_elitism);
+	int best_individual;
+	if (n_elitism > 0) // elitism takes the x bests and puts them to the new generation
+		best_individual = elitist_casting(parents, pop_size, n_select, n_elitism, children);
+	else // casting selects the best individuals randomly by fitness
+	 	best_individual = casting(parents, pop_size, n_select, children + n_elitism);
 
 	// crossover crosses the survivals to get new better individuals
 	Genome * last_individual = children + n_elitism + n_select;

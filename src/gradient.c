@@ -207,7 +207,7 @@ int optimise_parameters(Genome * genome, fitness_func func) {
         status = gsl_multimin_fdfminimizer_iterate(s);
         if (status) break;
         status = gsl_multimin_test_gradient(s->gradient, 1e-3);
-    } while (status == GSL_CONTINUE && iter < 100);
+    } while (status == GSL_CONTINUE && iter < 10);
 
     if (s->f < genome->fitness) {
         printf("Optimising the genome decreased the fidelity from %.2f to %.2f\n", genome->fitness, s->f);

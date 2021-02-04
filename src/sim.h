@@ -59,6 +59,8 @@ int compute_fitness(Genome * genome, fitness_func ff);
  */
 int evolve(double * x, void * params, fitness_func ff, double * fitness);
 
+int store_trajectory(double * xt, void * ODE_pars, FILE *outfile);
+
 int run_runge_putta(double * xt, void * ODE_pars, fitness_func func, double * fitness);
 
 # define EXP_NU 0.05

@@ -47,8 +47,8 @@ void save_bestind(Genome * population, int bestindividual){
 	if ((fp = fopen("bestindividual.txt", "w")) != 0)
 		printf("Could not open file");
 
-	fprintf(fp, "fitness: %.16f ,E: %.16f  ,I_1: %.16f  ,A: %.16f \n", population[bestindividual].fitness, ic[1], ic[2], ic[3]);
-	fprintf(fp, "beta: %.16f  ,phi: %.16f  ,epsilon_i: %.16f \nepsilon_Y: %.16f  ,sigma: %.16f  ,gamma_1: %.16f \ngamma_2: %.16f  ,kappa: %.16f  ,p: %.16f \nalpha: %.16f  ,delta: %.16f",
+	fprintf(fp, "fitness: %.16f\nE: %.16f\nI_1: %.16f\nA: %.16f\n", population[bestindividual].fitness, ic[1], ic[2], ic[3]);
+	fprintf(fp, "beta: %.16f\nphi: %.16f\nepsilon_i: %.16f\nepsilon_Y: %.16f\nsigma: %.16f\ngamma_1: %.16f\ngamma_2: %.16f\nkappa: %.16f\np: %.16f\nalpha: %.16f\ndelta: %.16f",
 				pbest->beta,
 				pbest->phi,
 				pbest->e1,
@@ -114,7 +114,7 @@ int main(int argc, char ** argv) {
 		best_individual = next_generation(population, temp_population,
 										  number_elitism, number_selection, number_crossover, number_migration, 0.3);
 
-		if(iter % (maxiter/100) == 0) {
+		if (iter % (maxiter/100) == 0) {
 			#pragma omp parallel for
 			for (i = 0; i < number_elitism + number_selection; i ++)
 				if (temp_population[i].fitness > 0) optimise_parameters(temp_population + i, ff);
