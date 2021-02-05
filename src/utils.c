@@ -8,7 +8,9 @@ static gsl_rng * rng = NULL;
 
 void init_rng() {
     rng = gsl_rng_alloc(gsl_rng_default);
-    gsl_rng_set(rng, (unsigned) time(NULL));
+    unsigned seed = (unsigned) time(NULL);
+    printf("Seed: %d\n", seed);
+    gsl_rng_set(rng, seed);
 }
 
 void free_rng() {

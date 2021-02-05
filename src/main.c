@@ -63,9 +63,24 @@ void save_bestind(Genome * population, int bestindividual){
 
 	store_trajectory(ic, pbest, fp);
 	fclose(fp);
-
-
 }
+
+void printf_genome(Genome * g) {
+	printf("%.8f,%ld,%ld,%ld", g->fitness, g->c1[0], g->c1[1], g->c1[2]);
+	printf("%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld\n",
+			g->c2[0],
+			g->c2[1],
+			g->c2[2],
+			g->c2[3],
+			g->c2[4],
+			g->c2[5],
+			g->c2[6],
+			g->c2[7],
+			g->c2[8],
+			g->c2[9],
+			g->c2[10]);
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////
 // Main Function //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -75,15 +90,14 @@ int main(int argc, char ** argv) {
 	int maxiter = 2000; // ficar la possibilitat de donarho en runtime
 	if(argc > 2) maxiter = atoi(argv[2]);
 	printf("Initializing with %d individuals and %d maxiter\n", individuals, maxiter);
-	int termination=0;
-	int iter=0;
-	double fitness_threshold = 1;
+	int iter = 0;
 
 	int number_elitism = 2;
-	int number_selection = 100;
-	int number_crossover = 200;
+	int number_selection = 50;
+	int number_crossover = 100;
 	int number_migration = individuals - number_elitism - number_selection - number_crossover;
 	int best_individual;
+	int mutation_bit = UL_SIZE;
 
 	Genome * population;
 	Genome * temp_population;
@@ -100,46 +114,38 @@ int main(int argc, char ** argv) {
 	int i;
 
 	printf("Entering genetic algorithm\n");
-	do {
+	while (iter < maxiter) {
 	 	// fitness calculates the fitness of every guy in the population
 		#pragma omp parallel for
         for (i = 0; i < individuals; i++) // exclude those simulation of repeated genes to speed up simulation!
             if (population[i].fitness < 0) compute_fitness(population + i, ff); // TODO: parallel
 
-		// save_population(population, individuals, "step_" + i); pero esta bé
-
-		// elitism takes the x bests and puts them to the new generation
-
-		// TODO: change the fitness by setting the value of ff to any of fitness_exp, fitness_max...
-		best_individual = next_generation(population, temp_population,
-										  number_elitism, number_selection, number_crossover, number_migration, 0.3);
-
-		if (iter % (maxiter/100) == 0) {
+		if (iter % 500 == 0) {
 			#pragma omp parallel for
-			for (i = 0; i < number_elitism + number_selection; i ++)
-				if (temp_population[i].fitness > 0) optimise_parameters(temp_population + i, ff);
+			for (i = 0; i < individuals; i ++)
+				if (population[i].fitness > 0) optimise_parameters(population + i, ff);
 			// copy_genome(population + best_individual, temp_population);
-			printf("Generation %d with fitness %.8f\n", iter,population[best_individual].fitness);
 		}
 
-		// termination condition
-		if (population[best_individual].fitness < fitness_threshold || iter > maxiter) {
-			termination = 1;
-			if (population[best_individual].fitness < fitness_threshold)
-				printf("Exiting genetic algorithm by fitness threshold\n");
-			if (iter > maxiter)
-				printf("Exiting genetic algorithm by maxiter reached\n");
-		} else {
-            // exchange pointers of parents and children populations
-            Genome * tmp = population;
-            population = temp_population;
-            temp_population = tmp;
-			++iter;
-        }
-	} while(termination == 0);
+		mutation_bit = 1 + (int) (UL_SIZE - 1) * ((1.0 - ((float)iter) / ((float)maxiter)));
+		// mutation_bit = UL_SIZE;
+		best_individual = next_generation(population, temp_population,
+										  number_elitism, number_selection, number_crossover, number_migration,
+										  0.35, mutation_bit);
 
-	save_bestind(population,best_individual);
+		if (iter % (maxiter/100) == 0)
+			printf("Generation %d with fitness %.8f\n", iter, population[best_individual].fitness);
+
+        // exchange pointers of parents and children populations
+        Genome * tmp = population;
+        population = temp_population;
+        temp_population = tmp;
+		++iter;
+	}
+
+	printf_genome(population);
+	save_bestind(population, 0);
 	printf("Exited genetic algorithm\n");
-	printf("Fitness reached of %f, and total iterations of %d\n", population[best_individual].fitness, iter);
+	printf("Fitness reached of %f, and total iterations of %d\n", population[0].fitness, iter);
 	free_rng();
 }

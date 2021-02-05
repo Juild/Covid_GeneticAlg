@@ -126,15 +126,20 @@ void __fitness_gradient(
   params = (Parameters *) malloc(sizeof(Parameters));
   gsl_vector * w = gsl_vector_alloc(GRADIENT_DIM);
   gsl_vector_memcpy(w, v);
-  GradientParams g_params = {0, w, ic, params, func};
 
-  gsl_function F = {__central_difference, (void *) &g_params};
-
-  double df_dxi, abserr;
+  // using the central differences method reduces the performance significally,
+  // by using the backward derivate we obtain a not so accurate approximation but the number of
+  // calls to the RK78 is reduced by half
+  double dfxmh, fv, val, h = 1e-8;
+  if (run_runge_putta(ic, params, *func, &fv)) fv = DBL_MAX;
   for (int i = 0; i < GRADIENT_DIM; i++) {
-      g_params.i = i;
-      gsl_deriv_central(&F, gsl_vector_get(v, i), 1e-8, &df_dxi, &abserr);
-      gsl_vector_set(df, i, df_dxi);
+      val = gsl_vector_get(w, i);
+      gsl_vector_set(w, i, val - h);
+      __gsl_vector_to_phenotype(w, ic, params);
+      dfxmh = 0.0;
+      if (run_runge_putta(ic, params, *func, &dfxmh)) dfxmh = DBL_MAX;
+      gsl_vector_set(df, i, (dfxmh - fv) / h);
+      gsl_vector_set(w, i, val);
   }
 
   gsl_vector_free(w);
@@ -157,8 +162,7 @@ void __fitness_f_gradient(
 	params = (Parameters *) malloc(sizeof(Parameters));
 	__gsl_vector_to_phenotype(v, ic, params);
 
-	if (run_runge_putta(ic, params, *func, f))
-		*f = DBL_MAX;
+	if (run_runge_putta(ic, params, *func, f)) *f = DBL_MAX;
 
     gsl_vector * w = gsl_vector_alloc(GRADIENT_DIM);
     gsl_vector_memcpy(w, v);
@@ -203,24 +207,20 @@ int optimise_parameters(Genome * genome, fitness_func func) {
     gsl_multimin_fdfminimizer_set(s, &my_func, v, 0.1, 1e-4);
 
     do {
-        iter++;
         status = gsl_multimin_fdfminimizer_iterate(s);
-        // if (status) break;
-        // status = gsl_multimin_test_gradient(s->gradient, 1e-3);
-    } while (status == GSL_CONTINUE && iter < GRADIENT_MAX_ITERS);
+    } while (status == GSL_CONTINUE && ++iter < GRADIENT_MAX_ITERS);
+
+    status = 1;
 
     if (s->f < genome->fitness) {
-        printf("Optimising the genome decreased the fidelity from %.2f to %.2f\n", genome->fitness, s->f);
+        // printf("Optimising the genome decreased the fidelity from %.2f to %.2f\n", genome->fitness, s->f);
         genome->fitness = s->f;
         __gsl_vector_to_genotype(genome, v);
-
-        gsl_multimin_fdfminimizer_free(s);
-        gsl_vector_free(v);
-        return 1;
+        status = 0; // no error
     }
 
     gsl_multimin_fdfminimizer_free(s);
     gsl_vector_free(v);
 
-    return 0;
+    return status;
 }

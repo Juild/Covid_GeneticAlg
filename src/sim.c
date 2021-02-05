@@ -44,7 +44,7 @@ void fitness_linear(int day, double * rk_data, double * f) {
 }
 
 void fitness_exp(int day, double * rk_data, double * f) {
-	*f += NORM_EXP * exp(-EXP_NU * day) * (
+	*f += NORM_EXP * exp(EXP_NU * day) * (
 		gsl_pow_2(rk_data[0] - DATA[day][0]) +
 		gsl_pow_2(rk_data[1] - DATA[day][1]) +
 		gsl_pow_2(rk_data[2] - DATA[day][2]) +

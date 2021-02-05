@@ -7,6 +7,8 @@
 #include <gsl/gsl_math.h>
 #include "utils.h"
 
+# define UL_SIZE sizeof(unsigned long)
+
 # define GENES_C1 3
 # define GENES_C2 11
 
@@ -22,7 +24,7 @@ void generate_genome(Genome * genome);
 Genome * generate_population(int individuals);
 int next_generation(
 	Genome * parents, Genome * children,
-	int n_elitism, int n_select, int n_cross, int n_new, double p_mutation
+	int n_elitism, int n_select, int n_cross, int n_new, double p_mutation, int mutation_bit
 );
 
 /*
