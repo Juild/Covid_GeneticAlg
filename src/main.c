@@ -84,6 +84,8 @@ void printf_genome(Genome * g) {
 ///////////////////////////////////////////////////////////////////////////////////////
 // Main Function //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
+
+
 int main(int argc, char ** argv) {
 	int individuals = 500;
 	if(argc > 1) individuals = atoi(argv[1]);
@@ -91,6 +93,7 @@ int main(int argc, char ** argv) {
 	if(argc > 2) maxiter = atoi(argv[2]);
 	printf("Initializing with %d individuals and %d maxiter\n", individuals, maxiter);
 	int iter = 0;
+	int termination = 0;
 
 	int number_elitism = 2;
 	int number_selection = 50;
@@ -98,6 +101,13 @@ int main(int argc, char ** argv) {
 	int number_migration = individuals - number_elitism - number_selection - number_crossover;
 	int best_individual;
 	int mutation_bit = UL_SIZE;
+	
+	int cooldown = 200;
+	unsigned int extinction_period = 500;
+	int number_survivors = 4;
+	int extinc_migration = 0;
+	int extinc_selection = 200;
+	int extinc_cross     = individuals - number_survivors - extinc_migration - extinc_selection;
 
 	Genome * population;
 	Genome * temp_population;
@@ -105,6 +115,12 @@ int main(int argc, char ** argv) {
 
 	fitness_func ff;
 	ff = fitness_exp;
+	
+	int ek = 0;
+	int recovery = cooldown + 1 ;
+	double fitness_temp=1.f;
+	float epsilon = 1.0;
+
 
 	init_rng();
 
@@ -119,7 +135,34 @@ int main(int argc, char ** argv) {
 		#pragma omp parallel for
         for (i = 0; i < individuals; i++) // exclude those simulation of repeated genes to speed up simulation!
             if (population[i].fitness < 0) compute_fitness(population + i, ff); // TODO: parallel
+	
+		
+	if (recovery < cooldown) {
+			best_individual = next_generation(population, temp_population,
+                                          	number_survivors, extinc_selection, extinc_cross, extinc_migration, 0.1);
+			recovery++;
+			//if(iter % (maxiter/100) == 0)printf("Entering cooldown if\n");
+			fitness_temp=population[best_individual].fitness;
 
+		} else {
+        	int rdn=random_int(extinction_period);
+        	if (rdn < ek) {
+        		recovery=0;
+        		ek = extinction( ek, population, temp_population, individuals, number_survivors);
+        		printf("An extinction has occurred\n");
+        		init_rng();
+        	} else {
+				best_individual = next_generation(population, temp_population,
+                                          		number_elitism, number_selection, number_crossover, number_migration, 0.3);
+				//if(iter % (maxiter/100) == 0)printf("normal behaviour, values %.8f,%.8f\n",population[best_individual].fitness,fitness_temp);
+
+				if ((abs(population[best_individual].fitness -fitness_temp) < epsilon )||((population[best_individual].fitness -fitness_temp)==0)) ek++;
+				fitness_temp=population[best_individual].fitness;
+			}
+		}
+		
+		
+		
 		if (iter % 500 == 0) {
 			#pragma omp parallel for
 			for (i = 0; i < individuals; i ++)
@@ -129,10 +172,6 @@ int main(int argc, char ** argv) {
 
 		mutation_bit = 1 + (int) (UL_SIZE - 1) * ((1.0 - ((float)iter) / ((float)maxiter)));
 		// mutation_bit = UL_SIZE;
-		best_individual = next_generation(population, temp_population,
-										  number_elitism, number_selection, number_crossover, number_migration,
-										  0.35, mutation_bit);
-
 		if (iter % (maxiter/100) == 0)
 			printf("Generation %d with fitness %.8f\n", iter, population[best_individual].fitness);
 
