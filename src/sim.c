@@ -44,7 +44,7 @@ void fitness_linear(int day, double * rk_data, double * f) {
 }
 
 void fitness_exp(int day, double * rk_data, double * f) {
-	*f += NORM_EXP * exp(-EXP_NU * day) * (
+	*f += NORM_EXP * exp(EXP_NU * day) * (
 		gsl_pow_2(rk_data[0] - DATA[day][0]) +
 		gsl_pow_2(rk_data[1] - DATA[day][1]) +
 		gsl_pow_2(rk_data[2] - DATA[day][2]) +
@@ -106,10 +106,16 @@ int run_runge_putta(double * xt, void * ODE_pars, fitness_func func, double * fi
 
 	return 0;
 }
+
 int store_trajectory(double * xt, void * ODE_pars, FILE *outfile) {
 	register int ndays;
 	double t = 0.0, err, h = 1.e-3;
-	fprintf(outfile, "\nA_d\tI_2\tY\tR\tD\n");
+	fprintf(outfile, "\nS,E,I_1,A,A_d,I_1,I_2,Y,R\n");
+
+	double * rk_data;
+	rk_data = (double *) malloc(N_PARAMS * sizeof(double));
+
+	double fu = 0.0, fl = 0.0, fe = 0.0, fm = 0.0;
 
 	for (ndays = 1; ndays < DAYS; ++ndays) {
 		int status;
@@ -121,14 +127,34 @@ int store_trajectory(double * xt, void * ODE_pars, FILE *outfile) {
 		status = RKF78Sys(&t, xt, CoreModelDIM, &h, &err, HMIN, HMAX, RKTOL, ODE_pars, CoreModel);
 		if (status) return status;
 
-		fprintf(outfile, "%.16f,", xt[4]); //A_d
+		fprintf(outfile, "%.16f,", POP_SIZE - (xt[0]+xt[1]+xt[2]+xt[3]+xt[4]+xt[5]+xt[6]+xt[7]));
+		fprintf(outfile, "%.16f,", xt[0]);
+		fprintf(outfile, "%.16f,", xt[1]);
+		fprintf(outfile, "%.16f,", xt[2]);
+		fprintf(outfile, "%.16f,", xt[3]);
+		fprintf(outfile, "%.16f,", xt[4]); // A_d
 		fprintf(outfile, "%.16f,", xt[5]);
 		fprintf(outfile, "%.16f,", xt[6]);
-		fprintf(outfile, "%.16f,", xt[7]);
-		fprintf(outfile, "%.16f,", xt[6]);
-		fprintf(outfile, "%.16f,", xt[6]);
-		fprintf(outfile, "%.16f\n",  POP_SIZE - (xt[0]+xt[1]+xt[2]+xt[3]+xt[4]+xt[5]+xt[6]+xt[7]));
+		fprintf(outfile, "%.16f\n", xt[7]);
+
+		rk_data[0] = xt[4];
+		rk_data[1] = xt[5];
+		rk_data[2] = xt[6];
+		rk_data[3] = xt[7];
+		rk_data[4] = POP_SIZE - (xt[0]+xt[1]+xt[2]+xt[3]+xt[4]+xt[5]+xt[6]+xt[7]);
+
+		fitness_exp(ndays, rk_data, &fe);
+		fitness_linear(ndays, rk_data, &fl);
+		fitness_uniform(ndays, rk_data, &fu);
+		fitness_max(ndays, rk_data, &fm);
 	}
+
+	fprintf(outfile, "F_linear: %.5f\n", fl);
+	fprintf(outfile, "F_uniform: %.5f\n", fu);
+	fprintf(outfile, "F_exp: %.5f\n", fe);
+	fprintf(outfile, "F_max: %.5f\n", fm);
+
+	free(rk_data);
 	return 0;
 }
 

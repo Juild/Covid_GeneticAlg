@@ -1,7 +1,5 @@
 #include "ga.h"
 
-# define UL_SIZE sizeof(unsigned long)
-
 void generate_genome(Genome * genome) {
 	//generating initial states for chromosome 1
 	genome -> c1[0] = random_ulong();
@@ -54,6 +52,14 @@ int bitwise_mutation(unsigned long *f, double prob) {
 	return 0;
 }
 
+int scaled_mutation(unsigned long *f, double prob, int max_bit) {
+	if (random_double() < prob) {
+		*f = (*f)^(1U << random_int(max_bit));
+		return 1;
+	}
+	return 0;
+}
+
 void mutate_genome(Genome * genome, double prob) {
 	if (bitwise_mutation(genome->c1, prob)
 		+ bitwise_mutation(genome->c1 + 1, prob)
@@ -69,6 +75,24 @@ void mutate_genome(Genome * genome, double prob) {
 		+ bitwise_mutation(genome->c2 + 8, prob)
 		+ bitwise_mutation(genome->c2 + 9, prob)
 		+ bitwise_mutation(genome->c2 + 10, prob)) // gen `i` has been mutate, so reset fitness to default
+			genome->fitness = -1;
+}
+
+void scaled_mutate_genome(Genome * genome, double prob, int max_bit) {
+	if (scaled_mutation(genome->c1, prob, max_bit)
+		+ scaled_mutation(genome->c1 + 1, prob, max_bit)
+		+ scaled_mutation(genome->c1 + 2, prob, max_bit)
+		+ scaled_mutation(genome->c2, prob, max_bit)
+		+ scaled_mutation(genome->c2 + 1, prob, max_bit)
+		+ scaled_mutation(genome->c2 + 2, prob, max_bit)
+		+ scaled_mutation(genome->c2 + 3, prob, max_bit)
+		+ scaled_mutation(genome->c2 + 4, prob, max_bit)
+		+ scaled_mutation(genome->c2 + 5, prob, max_bit)
+		+ scaled_mutation(genome->c2 + 6, prob, max_bit)
+		+ scaled_mutation(genome->c2 + 7, prob, max_bit)
+		+ scaled_mutation(genome->c2 + 8, prob, max_bit)
+		+ scaled_mutation(genome->c2 + 9, prob, max_bit)
+		+ scaled_mutation(genome->c2 + 10, prob, max_bit)) // gen `i` has been mutate, so reset fitness to default
 			genome->fitness = -1;
 }
 
@@ -220,6 +244,46 @@ int casting(Genome * population, int pop_size, int best_genomes, Genome * out) {
 	return best_index;
 }
 
+/* Does casting and elitism all at once to avoid double loops */
+int elitist_casting(Genome * population, int pop_size, int best_genomes, int number_elitism, Genome * out) {
+	// roulette wheeeeeeeel
+	register int i, j;
+	double p_cumsum[pop_size], p;
+
+	int best_indices[number_elitism];
+
+	// initialise the list of best individuals arbitrarialy to the first individuals of the previous population
+	for (j = 0; j < number_elitism; j++) best_indices[j] = j;
+
+	p_cumsum[0] = 1.0 / population[0].fitness;
+	for (i = 1; i < pop_size; i++) {
+		p = 1.0 / population[i].fitness;
+		p_cumsum[i] = p_cumsum[i - 1] + p;
+		for (j = 0; j < number_elitism; j++)
+			if (population[best_indices[j]].fitness > population[i].fitness) {
+				// we have found a better one at index i, so add it to the list of best individuals
+				best_indices[j] = i; break;
+			}
+	}
+
+	//normalise
+	p = p_cumsum[pop_size - 1];
+	for (i = 0; i < pop_size; i++) p_cumsum[i] /= p;
+
+	// copy the best individuals to the out population
+	for (j = 0; j < number_elitism; j++) copy_genome(population + best_indices[j], out + j);
+
+	best_genomes += number_elitism; // just increase this number here and start after elitism to reduce operations
+	for (i = number_elitism; i < best_genomes; i++) {
+		p = random_double();
+		for (j = 0; j < pop_size; j++) if (p < p_cumsum[j]) break;
+		copy_genome(population + j, out + i);
+	}
+
+	// by how we calculated this array, the best is guaranteed to be in the first position
+	return best_indices[0];
+}
+
 /*
  * Add `n_new` individuals to the start of the passed genome array.
  */
@@ -242,7 +306,7 @@ void copy_genome(Genome * in, Genome * out) {
 
 int next_generation(
 	Genome * parents, Genome * children,
-	int n_elitism, int n_select, int n_cross, int n_new, double p_mutation
+	int n_elitism, int n_select, int n_cross, int n_new, double p_mutation, int mutation_bit
 ) {
 	int pop_size = n_elitism + n_select + n_cross + n_new;
 	int i;
@@ -250,11 +314,11 @@ int next_generation(
 	if (n_cross % 2 == 1) // ensure ǹumber of crossover is even
 		exit_error("Please define the crossover number as even!", 33);
 
-	// elitism takes the x bests and puts them to the new generation
-	if (n_elitism > 0) elitism(parents, pop_size, n_elitism, children);
-
-	// casting selects the best individuals randomly by fitness
-	int best_individual = casting(parents, pop_size, n_select, children + n_elitism);
+	int best_individual;
+	if (n_elitism > 0) // elitism takes the x bests and puts them to the new generation
+		best_individual = elitist_casting(parents, pop_size, n_select, n_elitism, children);
+	else // casting selects the best individuals randomly by fitness
+	 	best_individual = casting(parents, pop_size, n_select, children + n_elitism);
 
 	// crossover crosses the survivals to get new better individuals
 	Genome * last_individual = children + n_elitism + n_select;
@@ -268,7 +332,8 @@ int next_generation(
 	// mutations mutate a bit some people so a bit of randomness is included
 	// exclude elitist from mutation! this is rather artificial
 	// TODO: parallel
-	if (p_mutation > 0) for (i = n_elitism; i < pop_size - n_new; i++) mutate_genome(children + i, p_mutation);
+	if (p_mutation > 0)
+		for (i = n_elitism; i < pop_size - n_new; i++) scaled_mutate_genome(children + i, p_mutation, mutation_bit);
 
 	if (n_new > 0) migration(children + (pop_size - n_new), n_new);
 
