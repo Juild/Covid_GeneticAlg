@@ -66,7 +66,7 @@ void CoreModel(double t, double * x, unsigned dim, double * der, void * params) 
 	Parameters *par = (Parameters *) params; // To simplify the usage of Params (void pointer)
 	double sigmae = par->sigma*x[1], gamma1i1 = par->gamma1*x[2], kappaA = par->kappa*x[3], alphai2 = par->alpha*x[5];
 	der[0] = par->phi*x[2] + x[3] + (1-par->e1)*(x[4]+x[5]) + (1-par->eY)*x[6];
-	der[0] = - par->beta * (x[0] * der[0])/POP_SIZE;
+	der[0] = - par->beta * (x[0] * der[0]) / (x[0]+x[1]+x[2]+x[3]+x[4]+x[5]+x[6]+x[7]);
 	der[1] = -der[0] - sigmae;
 	der[2] = sigmae - gamma1i1;
 	der[3] = (1-par->p)*gamma1i1 - kappaA - par->gamma2*x[3] ;
@@ -83,7 +83,7 @@ int run_runge_putta(double * xt, void * ODE_pars, fitness_func func, double * fi
 
 	double * rk_data;
 	rk_data = (double *) malloc(N_PARAMS * sizeof(double));
-
+	*fitness = 0.0;
 	for (ndays = 1; ndays < DAYS; ++ndays) {
 		int status;
 		while (t + h < ndays) {
@@ -101,7 +101,6 @@ int run_runge_putta(double * xt, void * ODE_pars, fitness_func func, double * fi
 		rk_data[4] = POP_SIZE - (xt[0]+xt[1]+xt[2]+xt[3]+xt[4]+xt[5]+xt[6]+xt[7]);
 		func(ndays, rk_data, fitness);
 	}
-
 	free(rk_data);
 
 	return 0;
@@ -110,7 +109,7 @@ int run_runge_putta(double * xt, void * ODE_pars, fitness_func func, double * fi
 int store_trajectory(double * xt, void * ODE_pars, FILE *outfile) {
 	register int ndays;
 	double t = 0.0, err, h = 1.e-3;
-	fprintf(outfile, "\nS,E,I_1,A,A_d,I_1,I_2,Y,R\n");
+	fprintf(outfile, "\nD,S,E,I_1,A,A_d,I_1,I_2,Y,R\n");
 
 	double * rk_data;
 	rk_data = (double *) malloc(N_PARAMS * sizeof(double));
@@ -154,6 +153,11 @@ int store_trajectory(double * xt, void * ODE_pars, FILE *outfile) {
 	fprintf(outfile, "F_exp: %.5f\n", fe);
 	fprintf(outfile, "F_max: %.5f\n", fm);
 
+	printf("F_linear: %.5f\n", fl);
+	printf("F_uniform: %.5f\n", fu);
+	printf("F_exp: %.5f\n", fe);
+	printf("F_max: %.5f\n", fm);
+
 	free(rk_data);
 	return 0;
 }
@@ -175,7 +179,6 @@ int compute_fitness(Genome * genome, fitness_func func) {
 		genome->fitness = DBL_MAX;
 		return 1;
 	}
-
 	genome->fitness = fitness;
 	free(ic);
 	free(params);

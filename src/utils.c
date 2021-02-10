@@ -8,6 +8,10 @@ static gsl_rng * rng = NULL;
 
 void init_rng() {
     rng = gsl_rng_alloc(gsl_rng_default);
+    change_seed();
+}
+
+void change_seed() {
     unsigned seed = (unsigned) time(NULL);
     printf("Seed: %d\n", seed);
     gsl_rng_set(rng, seed);

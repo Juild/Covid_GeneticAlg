@@ -10,6 +10,7 @@
 void exit_error(const char *miss, int errcode);
 
 void init_rng();
+void change_seed();
 void free_rng();
 double random_double();
 unsigned long random_ulong();
