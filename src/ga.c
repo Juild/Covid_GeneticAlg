@@ -6,17 +6,17 @@ void generate_genome(Genome * genome) {
 	genome -> c1[1] = random_int(1000000000);
 	genome -> c1[2] = random_int(1000000000);
 	//generating initial states for chromosome 2
-	genome -> c2[0] = random_ulong() % 1099511627776UL;
-	genome -> c2[1] = random_int(1048576);
+	genome -> c2[0] = random_int(1024);
+	genome -> c2[1] = random_int(1024);
 	genome -> c2[2] = random_int(1024);
 	genome -> c2[3] = random_int(1024);
-	genome -> c2[4] = random_int(1048576);
-	genome -> c2[5] = random_int(1048576);
-	genome -> c2[6] = random_int(1048576);
+	genome -> c2[4] = random_int(1024);
+	genome -> c2[5] = random_int(1024);
+	genome -> c2[6] = random_int(1024);
 	genome -> c2[7] = random_int(1024);
-	genome -> c2[8] = random_int(1048576);
-	genome -> c2[9] = random_ulong() % 1099511627776UL;
-	genome -> c2[10] = random_ulong() % 1099511627776UL;
+	genome -> c2[8] = random_int(1024);
+	genome -> c2[9] = random_int(1024);
+	genome -> c2[10] = random_int(1024);
 
 	genome->fitness = -1;
 }
