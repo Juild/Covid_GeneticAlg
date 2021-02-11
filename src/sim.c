@@ -109,7 +109,7 @@ int run_runge_putta(double * xt, void * ODE_pars, fitness_func func, double * fi
 int store_trajectory(double * xt, void * ODE_pars, FILE *outfile) {
 	register int ndays;
 	double t = 0.0, err, h = 1.e-3;
-	fprintf(outfile, "\nD,S,E,I_1,A,A_d,I_1,I_2,Y,R\n");
+	fprintf(outfile, "\nD,S,E,I_1,A,A_d,I_2,Y,R\n");
 
 	double * rk_data;
 	rk_data = (double *) malloc(N_PARAMS * sizeof(double));

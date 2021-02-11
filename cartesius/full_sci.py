@@ -1,7 +1,7 @@
 import logging
 
 from scipy.integrate import solve_ivp, DOP853
-from scipy.optimize import differential_evolution
+from scipy.optimize import differential_evolution, minimize
 import numpy as np
 
 
@@ -112,6 +112,7 @@ POP_SIZE = 1000000
 
 logging.basicConfig(filename='sim.log', level=logging.DEBUG)
 
+
 def fitness_linear(rk, nu=0.05):
     weight = np.arange(1, 101, 1) * 0.00019802
     return np.sum(np.sum(np.power(rk - DATA, 2.0), axis=1) * weight)
@@ -152,6 +153,11 @@ def f(y):
     sol = solve_ivp(model, [0, 100], x0, DOP853, args=(params, ), t_eval=np.arange(0, 100, 1))
     ys = sol.y.T
 
+    # deaths = POP_SIZE - np.sum(ys, axis=1)
+    # deaths = np.reshape(deaths, (len(deaths), 1))
+    # total = np.concatenate((deaths, ys), axis=1)
+    # np.savetxt('beeeeest.txt', total, delimiter=',', header='D,S,E,I_1,A,A_d,I_2,Y,R')
+
     rk = np.zeros((100, 5))
     rk[:, :4] = ys[:, 4:8]
     rk[:, 4] = POP_SIZE - np.sum(ys, axis=1)
@@ -164,10 +170,16 @@ def callback(x0, convergence):
 
 if __name__ == '__main__':
     bounds = [(0, POP_SIZE)] * 3 + [(0, 1)] * 11
-    res = differential_evolution(f, bounds,
-                                 popsize=100, maxiter=2,
-                                 workers=-1, polish=True, updating='deferred', callback=callback)
-    logging.info('\n\nResult found!!\n=================================================')
-    logging.info('{}'.format(res.x))
-    logging.info('{}'.format(res.fun))
-    logging.info('\n\nSolver info:\n{}'.format(res))
+    # res = differential_evolution(f, bounds,
+    #                              popsize=100, maxiter=2,
+    #                              workers=-1, polish=True, updating='deferred', callback=callback)
+    # logging.info('\n\nResult found!!\n=================================================')
+    # logging.info('{}'.format(res.x))
+    # logging.info('{}'.format(res.fun))
+    # logging.info('\n\nSolver info:\n{}'.format(res))
+
+    y = np.array([2.91933616e+01, 5.31691915e+00, 1.43503554e+01, 2.70574836e-01, 6.87159265e-01, 5.18435621e-01,
+                  5.66710845e-01, 2.03461206e-01, 5.83387843e-02, 8.21008768e-02, 4.88990375e-01, 5.86848718e-01,
+                  5.23592802e-02, 1.45014186e-02])
+
+    f(y)
