@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --nodes=1
-#SBATCH --time=48:00:00
+#SBATCH --time=10:00:00
 #SBATCH --partition=normal
 
 currentdir=$PWD
@@ -10,7 +10,7 @@ echo $currentdir
 tmp_dir="$(mktemp -d -p /scratch-shared)"
 echo $tmp_dir
 cp full_sci.py $tmp_dir
-
+cd $tmp_dir
 # init conda and execute script
 module load 2019
 module load Miniconda3
@@ -22,4 +22,5 @@ conda deactivate
 # copy the contents in the tmp folder to the output folder in this directory
 mkdir $currentdir/output
 cp -r $tmp_dir $currentdir/output
+cd $currentdir
 rm -r $tmp_dir
