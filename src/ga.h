@@ -34,13 +34,12 @@ int next_generation(
 void copy_genome(Genome * in, Genome * out);
 
 // a.k.a crossover
-void tinder(Genome * population, int pop_size, Genome * last_individual);
+void tinder(Genome * population, int pop_size, Genome * out);
 // actual crossover
 void crossover_genomes(
 	Genome * gen1in,
 	Genome * gen2in,
-	Genome * gen1out,
-	Genome * gen2out
+	Genome * out
 );
 
 void mutate_genome(Genome * genome, double p_mut);

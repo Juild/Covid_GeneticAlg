@@ -2,21 +2,21 @@
 
 void generate_genome(Genome * genome) {
 	//generating initial states for chromosome 1
-	genome -> c1[0] = random_ulong();
-	genome -> c1[1] = random_ulong();
-	genome -> c1[2] = random_ulong();
+	genome -> c1[0] = random_int(1000000000);
+	genome -> c1[1] = random_int(1000000000);
+	genome -> c1[2] = random_int(1000000000);
 	//generating initial states for chromosome 2
-	genome -> c2[0] = random_ulong();
-	genome -> c2[1] = random_ulong();
-	genome -> c2[2] = random_ulong();
-	genome -> c2[3] = random_ulong();
-	genome -> c2[4] = random_ulong();
-	genome -> c2[5] = random_ulong();
-	genome -> c2[6] = random_ulong();
-	genome -> c2[7] = random_ulong();
-	genome -> c2[8] = random_ulong();
-	genome -> c2[9] = random_ulong();
-	genome -> c2[10] = random_ulong();
+	genome -> c2[0] = random_ulong() % 1099511627776UL;
+	genome -> c2[1] = random_int(1048576);
+	genome -> c2[2] = random_int(1024);
+	genome -> c2[3] = random_int(1024);
+	genome -> c2[4] = random_int(1048576);
+	genome -> c2[5] = random_int(1048576);
+	genome -> c2[6] = random_int(1048576);
+	genome -> c2[7] = random_int(1024);
+	genome -> c2[8] = random_int(1048576);
+	genome -> c2[9] = random_ulong() % 1099511627776UL;
+	genome -> c2[10] = random_ulong() % 1099511627776UL;
 
 	genome->fitness = -1;
 }
@@ -34,13 +34,13 @@ Genome * generate_population(int individuals) {
 	return population;
 }
 
-void tinder(Genome * population, int pop_size, Genome * last_individual) { //Superlike
+void tinder(Genome * population, int pop_size, Genome * out) { //Superlike
 	int ind1 = random_int(pop_size);
 	int ind2;
 
 	while ((ind2 = random_int(pop_size)) == ind1);
 
-	crossover_genomes(population + ind1, population + ind2, last_individual, last_individual + 1);
+	crossover_genomes(population + ind1, population + ind2, out);
 }
 
 //genetic functions
@@ -61,20 +61,20 @@ int scaled_mutation(unsigned long *f, double prob, int max_bit) {
 }
 
 void mutate_genome(Genome * genome, double prob) {
-	if (bitwise_mutation(genome->c1, prob)
-		+ bitwise_mutation(genome->c1 + 1, prob)
-		+ bitwise_mutation(genome->c1 + 2, prob)
-		+ bitwise_mutation(genome->c2, prob)
-		+ bitwise_mutation(genome->c2 + 1, prob)
-		+ bitwise_mutation(genome->c2 + 2, prob)
-		+ bitwise_mutation(genome->c2 + 3, prob)
-		+ bitwise_mutation(genome->c2 + 4, prob)
-		+ bitwise_mutation(genome->c2 + 5, prob)
-		+ bitwise_mutation(genome->c2 + 6, prob)
-		+ bitwise_mutation(genome->c2 + 7, prob)
-		+ bitwise_mutation(genome->c2 + 8, prob)
-		+ bitwise_mutation(genome->c2 + 9, prob)
-		+ bitwise_mutation(genome->c2 + 10, prob)) // gen `i` has been mutate, so reset fitness to default
+	if (scaled_mutation(genome->c1, prob, 30)
+		+ scaled_mutation(genome->c1 + 1, prob, 30)
+		+ scaled_mutation(genome->c1 + 2, prob, 30)
+		+ scaled_mutation(genome->c2, prob, 40)
+		+ scaled_mutation(genome->c2 + 1, prob, 20)
+		+ scaled_mutation(genome->c2 + 2, prob, 10)
+		+ scaled_mutation(genome->c2 + 3, prob, 10)
+		+ scaled_mutation(genome->c2 + 4, prob, 20)
+		+ scaled_mutation(genome->c2 + 5, prob, 20)
+		+ scaled_mutation(genome->c2 + 6, prob, 20)
+		+ scaled_mutation(genome->c2 + 7, prob, 10)
+		+ scaled_mutation(genome->c2 + 8, prob, 20)
+		+ scaled_mutation(genome->c2 + 9, prob, 40)
+		+ scaled_mutation(genome->c2 + 10, prob, 40)) // gen `i` has been mutate, so reset fitness to default
 			genome->fitness = -1;
 }
 
@@ -114,55 +114,26 @@ void bitwise_crossover_uniform(
 void crossover_genomes(
 	Genome * gen1in,
 	Genome * gen2in,
-	Genome * gen1out,
-	Genome * gen2out
+	Genome * out
 ) {
 	// cross initial conditions
-	// int i;
 	int val = random_int(GENES_C1 + GENES_C2 - 1) + 1;
 	if (val < GENES_C1) {
 		// crossover in the first chromosome
-		memcpy(gen1out->c1, gen1in->c1, val * UL_SIZE);
-		memcpy(gen2out->c1, gen2in->c1, val * UL_SIZE);
-		memcpy(gen1out->c1, gen2in->c1, (GENES_C1 - val) * UL_SIZE);
-		memcpy(gen2out->c1, gen1in->c1, (GENES_C1 - val) * UL_SIZE);
+		memcpy(out->c1, gen1in->c1, val * UL_SIZE);
+		memcpy(out->c1, gen2in->c1, (GENES_C1 - val) * UL_SIZE);
 
-		memcpy(gen1out->c2, gen2in->c2, GENES_C2 * UL_SIZE);
-		memcpy(gen2out->c2, gen1in->c2, GENES_C2 * UL_SIZE);
+		memcpy(out->c2, gen2in->c2, GENES_C2 * UL_SIZE);
 	} else {
 		// crossover in the 2nd chromosome
-		memcpy(gen1out->c1, gen1in->c1, GENES_C1 * UL_SIZE);
-		memcpy(gen2out->c1, gen2in->c1, GENES_C1 * UL_SIZE);
+		memcpy(out->c1, gen1in->c1, GENES_C1 * UL_SIZE);
 
 		val -= GENES_C1;
-		memcpy(gen1out->c2, gen1in->c2, val * UL_SIZE);
-		memcpy(gen2out->c2, gen2in->c2, val * UL_SIZE);
-		memcpy(gen1out->c2, gen2in->c2, (GENES_C2 - val) * UL_SIZE);
-		memcpy(gen2out->c2, gen1in->c2, (GENES_C2 - val) * UL_SIZE);
+		memcpy(out->c2, gen1in->c2, val * UL_SIZE);
+		memcpy(out->c2, gen2in->c2, (GENES_C2 - val) * UL_SIZE);
 	}
-	// for (i = 0; i < GENES_C1; i++) {
-	// 	if (i < val) { // copy as is
-	// 		gen1out->c1[i] = gen1in->c1[i];
-	// 		gen2out->c1[i] = gen2in->c1[i];
-	// 	} else {
-	// 		gen1out->c1[i] = gen2in->c1[i];
-	// 		gen2out->c1[i] = gen1in->c1[i];
-	// 	}
-	// }
-	//
-	// val -= GENES_C1;
-	// for (i = 0; i < GENES_C2; i++) {
-	// 	if (i < val) { // copy as is
-	// 		gen1out->c2[i] = gen1in->c2[i];
-	// 		gen2out->c2[i] = gen2in->c2[i];
-	// 	} else {
-	// 		gen1out->c2[i] = gen2in->c2[i];
-	// 		gen2out->c2[i] = gen1in->c2[i];
-	// 	}
-	// }
 
-	gen1out->fitness = -1;
-	gen2out->fitness = -1;
+	out->fitness = -1;
 }
 
 int extinction(int ek, Genome * population, Genome * survivors, int pop_size, int number_survivors){
@@ -311,9 +282,6 @@ int next_generation(
 	int pop_size = n_elitism + n_select + n_cross + n_new;
 	int i;
 
-	if (n_cross % 2 == 1) // ensure ǹumber of crossover is even
-		exit_error("Please define the crossover number as even!", 33);
-
 	int best_individual;
 	if (n_elitism > 0) // elitism takes the x bests and puts them to the new generation
 		best_individual = elitist_casting(parents, pop_size, n_select, n_elitism, children);
@@ -321,19 +289,13 @@ int next_generation(
 	 	best_individual = casting(parents, pop_size, n_select, children + n_elitism);
 
 	// crossover crosses the survivals to get new better individuals
-	Genome * last_individual = children + n_elitism + n_select;
-	int n_cross_half = n_cross / 2;
-	for (i = 0; i < n_cross_half; i++) {
-		// at each iter, two individuals are added
-		tinder(children, n_elitism + n_select, last_individual);
-		last_individual += 2;
-	}
+	for (i = 0; i < n_cross; i++) tinder(children, n_elitism + n_select, children + n_elitism + n_select + i);
 
 	// mutations mutate a bit some people so a bit of randomness is included
 	// exclude elitist from mutation! this is rather artificial
 	// TODO: parallel
 	if (p_mutation > 0)
-		for (i = n_elitism; i < pop_size - n_new; i++) scaled_mutate_genome(children + i, p_mutation, mutation_bit);
+		for (i = n_elitism; i < pop_size - n_new; i++) mutate_genome(children + i, p_mutation);
 
 	if (n_new > 0) migration(children + (pop_size - n_new), n_new);
 
