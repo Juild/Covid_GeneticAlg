@@ -12,8 +12,8 @@ void init_rng() {
 }
 
 void change_seed() {
-    unsigned long seed = random_ulong(); //(unsigned) time(NULL);
-    printf("Seed: %ld\n", seed);
+    unsigned seed = (unsigned) time(NULL);
+    printf("Seed: %d\n", seed);
     gsl_rng_set(rng, seed);
 }
 

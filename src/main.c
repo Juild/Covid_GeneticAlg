@@ -89,13 +89,12 @@ void printf_genome(Genome * g) {
 
 
 int main(int argc, char ** argv) {
-	int individuals = 300;
+	int individuals = 250;
 	if(argc > 1) individuals = atoi(argv[1]);
-	int maxiter = 10000; // ficar la possibilitat de donarho en runtime
+	int maxiter = 25000; // ficar la possibilitat de donarho en runtime
 	if(argc > 2) maxiter = atoi(argv[2]);
 	printf("Initializing with %d individuals and %d maxiter\n", individuals, maxiter);
 	int iter = 0;
-	int termination = 0;
 
 	int number_elitism = 2;
 	int number_selection = 20;
@@ -150,7 +149,7 @@ int main(int argc, char ** argv) {
 		if (recovery < cooldown) {
 				best_individual = next_generation(population, temp_population,
 	                                          	number_survivors, extinc_selection, extinc_cross, extinc_migration,
-												0.1, mutation_bit);
+												0.25, mutation_bit);
 				recovery++;
 				//if(iter % (maxiter/100) == 0)printf("Entering cooldown if\n");
 				fitness_temp=population[best_individual].fitness;
@@ -165,7 +164,7 @@ int main(int argc, char ** argv) {
 	        	} else {
 					best_individual = next_generation(population, temp_population,
 	                                          		number_elitism, number_selection, number_crossover, number_migration,
-													0.3, mutation_bit);
+													0.49, mutation_bit);
 					//if(iter % (maxiter/100) == 0)printf("normal behaviour, values %.8f,%.8f\n",population[best_individual].fitness,fitness_temp);
 
 					if ((abs(population[best_individual].fitness -fitness_temp) < epsilon )

@@ -25,21 +25,21 @@ void genotype_to_phenotype(Genome * genome, double * c1, Parameters * c2) {
 
 void fitness_uniform(int day, double * rk_data, double * f) {
 	*f += NORM_UNIFORM * (
-		gsl_pow_2(rk_data[0] - DATA[day][0]) +
-		gsl_pow_2(rk_data[1] - DATA[day][1]) +
-		gsl_pow_2(rk_data[2] - DATA[day][2]) +
-		gsl_pow_2(rk_data[3] - DATA[day][3]) +
-		gsl_pow_2(rk_data[4] - DATA[day][4])
+		gsl_pow_2(rk_data[0] - DATA[day][0])/70 +
+		gsl_pow_2(rk_data[1] - DATA[day][1])/80 +
+		gsl_pow_2(rk_data[2] - DATA[day][2])/5 +
+		gsl_pow_2(rk_data[3] - DATA[day][3])/300 +
+		gsl_pow_2(rk_data[4] - DATA[day][4])/0.1
 	);
 }
 
 void fitness_linear(int day, double * rk_data, double * f) {
 	*f += NORM_LINEAR * day * (
-		gsl_pow_2(rk_data[0] - DATA[day][0]) +
-		gsl_pow_2(rk_data[1] - DATA[day][1]) +
-		gsl_pow_2(rk_data[2] - DATA[day][2]) +
-		gsl_pow_2(rk_data[3] - DATA[day][3]) +
-		gsl_pow_2(rk_data[4] - DATA[day][4])
+		gsl_pow_2(rk_data[0] - DATA[day][0])/70 +
+		gsl_pow_2(rk_data[1] - DATA[day][1])/80 +
+		gsl_pow_2(rk_data[2] - DATA[day][2])/5 +
+		gsl_pow_2(rk_data[3] - DATA[day][3])/300 +
+		gsl_pow_2(rk_data[4] - DATA[day][4])/0.1
 	);
 }
 
@@ -54,11 +54,11 @@ void fitness_exp(int day, double * rk_data, double * f) {
 }
 
 void fitness_max(int day, double * rk_data, double * f) {
-	double ff = gsl_pow_2(rk_data[0] - DATA[day][0]) +
-				gsl_pow_2(rk_data[1] - DATA[day][1]) +
-				gsl_pow_2(rk_data[2] - DATA[day][2]) +
-				gsl_pow_2(rk_data[3] - DATA[day][3]) +
-				gsl_pow_2(rk_data[4] - DATA[day][4]);
+	double ff = gsl_pow_2(rk_data[0] - DATA[day][0])/70 +
+				gsl_pow_2(rk_data[1] - DATA[day][1])/80 +
+				gsl_pow_2(rk_data[2] - DATA[day][2])/5 +
+				gsl_pow_2(rk_data[3] - DATA[day][3])/300 +
+				gsl_pow_2(rk_data[4] - DATA[day][4])/0.1;
 	*f = GSL_MAX(ff, *f);
 }
 
