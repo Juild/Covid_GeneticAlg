@@ -4,7 +4,7 @@
 void __gsl_vector_to_phenotype(
     const gsl_vector *v,
     double * c1,
-    Parameters * c2
+    double * c2
 ) {
     c1[1] = gsl_vector_get(v, 0);  // crom2IC(genome -> c1[0]);
     c1[2] = gsl_vector_get(v, 1);  // crom2IC(genome -> c1[1]);
@@ -15,17 +15,17 @@ void __gsl_vector_to_phenotype(
     c1[7] = DATA[0][3];
     c1[0] = POP_SIZE - (c1[1] + c1[2] + c1[3] + c1[4] + c1[5] + c1[6]);
 
-    c2 -> beta = gsl_vector_get(v, 3);  // crom2HSPar(genome -> c2[0]);
-    c2 -> phi = gsl_vector_get(v, 4);  // crom2Par(genome -> c2[1]);
-    c2 -> e1 = gsl_vector_get(v, 5);  // crom2LSPar(genome -> c2[2]);
-    c2 -> eY = gsl_vector_get(v, 6);  // crom2LSPar(genome -> c2[3]);
-    c2 -> sigma = gsl_vector_get(v, 7);  // crom2Par(genome -> c2[4]);
-    c2 -> gamma1 = gsl_vector_get(v, 8);  // crom2Par(genome -> c2[5]);
-    c2 -> gamma2 = gsl_vector_get(v, 9);  // crom2Par(genome -> c2[6]);
-    c2 -> kappa = gsl_vector_get(v, 10);  // crom2LSPar(genome -> c2[7]);
-    c2 -> p = gsl_vector_get(v, 11);  // crom2Par(genome -> c2[8]);
-    c2 -> alpha = gsl_vector_get(v, 12);  // crom2HSPar(genome -> c2[9]);
-    c2 -> delta = gsl_vector_get(v, 13);  // crom2HSPar(genome -> c2[10]);
+    c2[0] = gsl_vector_get(v, 3);  // crom2HSPar(genome -> c2[0]);
+    c2[1] = gsl_vector_get(v, 4);  // crom2Par(genome -> c2[1]);
+    c2[2] = gsl_vector_get(v, 5);  // crom2LSPar(genome -> c2[2]);
+    c2[3] = gsl_vector_get(v, 6);  // crom2LSPar(genome -> c2[3]);
+    c2[4] = gsl_vector_get(v, 7);  // crom2Par(genome -> c2[4]);
+    c2[5] = gsl_vector_get(v, 8);  // crom2Par(genome -> c2[5]);
+    c2[6] = gsl_vector_get(v, 9);  // crom2Par(genome -> c2[6]);
+    c2[7] = gsl_vector_get(v, 10);  // crom2LSPar(genome -> c2[7]);
+    c2[8] = gsl_vector_get(v, 11);  // crom2Par(genome -> c2[8]);
+    c2[9] = gsl_vector_get(v, 12);  // crom2HSPar(genome -> c2[9]);
+    c2[10] = gsl_vector_get(v, 13);  // crom2HSPar(genome -> c2[10]);
 }
 
 void __genotype_to_gsl_vector(
@@ -36,17 +36,17 @@ void __genotype_to_gsl_vector(
     gsl_vector_set(v, 1, crom2IC(g -> c1[1]));
     gsl_vector_set(v, 2, crom2IC(g -> c1[2]));
 
-    gsl_vector_set(v, 3, crom2HSPar(g -> c2[0]));
-    gsl_vector_set(v, 4, crom2Par(g -> c2[1]));
-    gsl_vector_set(v, 5, crom2LSPar(g -> c2[2]));
-    gsl_vector_set(v, 6, crom2LSPar(g -> c2[3]));
-    gsl_vector_set(v, 7, crom2Par(g -> c2[4]));
-    gsl_vector_set(v, 8, crom2Par(g -> c2[5]));
-    gsl_vector_set(v, 9, crom2Par(g -> c2[6]));
-    gsl_vector_set(v, 10, crom2LSPar(g -> c2[7]));
-    gsl_vector_set(v, 11, crom2Par(g -> c2[8]));
-    gsl_vector_set(v, 12, crom2HSPar(g -> c2[9]));
-    gsl_vector_set(v, 13, crom2HSPar(g -> c2[10]));
+    gsl_vector_set(v, 3, g -> c2[0]);
+    gsl_vector_set(v, 4, g -> c2[1]);
+    gsl_vector_set(v, 5, g -> c2[2]);
+    gsl_vector_set(v, 6, g -> c2[3]);
+    gsl_vector_set(v, 7, g -> c2[4]);
+    gsl_vector_set(v, 8, g -> c2[5]);
+    gsl_vector_set(v, 9, g -> c2[6]);
+    gsl_vector_set(v, 10, g -> c2[7]);
+    gsl_vector_set(v, 11, g -> c2[8]);
+    gsl_vector_set(v, 12, g -> c2[9]);
+    gsl_vector_set(v, 13, g -> c2[10]);
 }
 
 void __gsl_vector_to_genotype(
@@ -57,17 +57,17 @@ void __gsl_vector_to_genotype(
     g->c1[1] = (unsigned long) (gsl_vector_get(v, 1) * 1000.0);
     g->c1[2] = (unsigned long) (gsl_vector_get(v, 2) * 1000.0);
 
-    g->c2[0] = (unsigned long) (gsl_vector_get(v, 3) * 1099511627776.0);
-    g->c2[1] = (unsigned long) (gsl_vector_get(v, 4) * 1048576.0);
-    g->c2[2] = (unsigned long) (gsl_vector_get(v, 5) * 1024.0);
-    g->c2[3] = (unsigned long) (gsl_vector_get(v, 6) * 1024.0);
-    g->c2[4] = (unsigned long) (gsl_vector_get(v, 7) * 1048576.0);
-    g->c2[5] = (unsigned long) (gsl_vector_get(v, 8) * 1048576.0);
-    g->c2[6] = (unsigned long) (gsl_vector_get(v, 9) * 1048576.0);
-    g->c2[7] = (unsigned long) (gsl_vector_get(v, 10) * 1024.0);
-    g->c2[8] = (unsigned long) (gsl_vector_get(v, 11) * 1048576.0);
-    g->c2[9] = (unsigned long) (gsl_vector_get(v, 12) * 1099511627776.0);
-    g->c2[10] = (unsigned long) (gsl_vector_get(v, 13) * 1099511627776.0);
+    g->c2[0] = gsl_vector_get(v, 3);
+    g->c2[1] = gsl_vector_get(v, 4);
+    g->c2[2] = gsl_vector_get(v, 5);
+    g->c2[3] = gsl_vector_get(v, 6);
+    g->c2[4] = gsl_vector_get(v, 7);
+    g->c2[5] = gsl_vector_get(v, 8);
+    g->c2[6] = gsl_vector_get(v, 9);
+    g->c2[7] = gsl_vector_get(v, 10);
+    g->c2[8] = gsl_vector_get(v, 11);
+    g->c2[9] = gsl_vector_get(v, 12);
+    g->c2[10] = gsl_vector_get(v, 13);
 }
 
 
@@ -79,8 +79,8 @@ double __fitness(
 
     double * ic;
 	ic = (double *) malloc(CoreModelDIM * sizeof(double));
-	Parameters * params;
-	params = (Parameters *) malloc(sizeof(Parameters));
+	double * params;
+	params = (double *) malloc(11 * sizeof(double));
 	__gsl_vector_to_phenotype(v, ic, params);
 
 	double fitness = 0.0;
@@ -122,8 +122,8 @@ void __fitness_gradient(
 
   double * ic;
   ic = (double *) malloc(CoreModelDIM * sizeof(double));
-  Parameters * params;
-  params = (Parameters *) malloc(sizeof(Parameters));
+  double * params;
+  params = (double *) malloc(11 * sizeof(double));
   gsl_vector * w = gsl_vector_alloc(GRADIENT_DIM);
   gsl_vector_memcpy(w, v);
 
@@ -158,8 +158,8 @@ void __fitness_f_gradient(
 
     double * ic;
 	ic = (double *) malloc(CoreModelDIM * sizeof(double));
-	Parameters * params;
-	params = (Parameters *) malloc(sizeof(Parameters));
+    double * params;
+    params = (double *) malloc(11 * sizeof(double));
 	__gsl_vector_to_phenotype(v, ic, params);
 
 	if (run_runge_putta(ic, params, *func, f)) *f = DBL_MAX;

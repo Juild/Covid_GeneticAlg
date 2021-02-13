@@ -14,7 +14,7 @@ typedef struct {
     int i;
     gsl_vector * v;
     double * ic;
-    Parameters * params;
+    double * params;
     fitness_func * ff;
 } GradientParams;
 

@@ -10,31 +10,12 @@
 # define CoreModelDIM 8
 
 #define crom2IC(c) (((double) (c))/1000.0) // Initial conditions
-#define crom2HSPar(c) (((double) (c))/1099511627776.0) // High sensitivity
-#define crom2Par(c) (((double) (c))/1048576.0) // Medium sensitivity
-#define crom2LSPar(c) (((double) (c))/1024.0) // Low sensitivity
-
-typedef struct Parameters {
-
-	double beta;
-	double phi;
-	double e1;
-	double eY;
-	double sigma;
-	double gamma1;
-	double gamma2;
-	double kappa;
-	double p;
-	double alpha;
-	double delta;
-
-} Parameters;
 
 #define HMAX 1.0
 #define HMIN 1.e-3
 #define RKTOL 1.e-5
 
-void genotype_to_phenotype(Genome * genome, double * ic, Parameters * params);
+void genotype_to_phenotype(Genome * genome, double * ic);
 
 /*
  * This is how a fitness function should be defined.

@@ -8,14 +8,15 @@
 #include "utils.h"
 
 # define UL_SIZE sizeof(unsigned long)
+# define DL_SIZE sizeof(double)
 
 # define GENES_C1 3
 # define GENES_C2 11
 
 // we are going to use a two chromosome genome,
 typedef struct Genome {
-	unsigned long c1[GENES_C1];
-	unsigned long c2[GENES_C2];
+	unsigned int c1[GENES_C1];
+	double c2[GENES_C2];
 	double fitness;
 } Genome;
 
@@ -24,7 +25,7 @@ void generate_genome(Genome * genome);
 Genome * generate_population(int individuals);
 int next_generation(
 	Genome * parents, Genome * children,
-	int n_elitism, int n_select, int n_cross, int n_new, double p_mutation, int mutation_bit
+	int n_elitism, int n_select, int n_cross, int n_new, double p_mutation, double sigma
 );
 
 /*
@@ -42,7 +43,9 @@ void crossover_genomes(
 	Genome * out
 );
 
-void mutate_genome(Genome * genome, double p_mut);
+void mutate_genome(Genome * genome, double p_mut, double sigma);
+
+int extinction(int ek, Genome * population, Genome * survivors, int pop_size, int number_survivors);
 
 /*
  * Implementation of elitism operator.
@@ -55,13 +58,6 @@ void mutate_genome(Genome * genome, double p_mut);
  *
  * @return the position of the best individual
  */
-
-
-int extinction(int ek, Genome * population, Genome * survivors, int pop_size, int number_survivors);
-
-
-
-
 void elitism(Genome * population, int pop_size, int number_elitism, Genome * out);
 
 /*

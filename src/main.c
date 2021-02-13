@@ -6,70 +6,38 @@
 # include "utils.h"
 #include <omp.h>
 
-/*
- * Just for statistic purposes.
- */
-void save_population(Genome * population, int individuals, const char * filename) {
-	FILE *fp;
-
-	if ((fp = fopen(filename, "w")) != 0)
-		printf("Could not open file");
-
-	for (int i = 0; i < individuals; i++) {
-		fprintf(fp, "%.8f,%ld,%ld,%ld",
-				population[i].fitness, population[i].c1[0], population[i].c1[1], population[i].c1[2]);
-		fprintf(fp, "%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld",
-				population[i].c2[0],
-				population[i].c2[1],
-				population[i].c2[2],
-				population[i].c2[3],
-				population[i].c2[4],
-				population[i].c2[5],
-				population[i].c2[6],
-				population[i].c2[7],
-				population[i].c2[8],
-				population[i].c2[9],
-				population[i].c2[10]);
-	}
-
-	fclose(fp);
-}
-
 
 void save_bestind(Genome * population, int bestindividual){
 	FILE *fp;
 	double * ic;
 	ic = (double *) malloc(CoreModelDIM * sizeof(double));
-	Parameters * pbest;
-	pbest = (Parameters *) malloc(sizeof(Parameters));
-	genotype_to_phenotype(population + bestindividual, ic, pbest);
+	genotype_to_phenotype(population + bestindividual, ic);
 
 	if ((fp = fopen("bestindividual.txt", "w")) != 0)
 		printf("Could not open file");
 
 	fprintf(fp, "fitness: %.16f\nE: %.16f\nI_1: %.16f\nA: %.16f\n", population[bestindividual].fitness, ic[1], ic[2], ic[3]);
 	fprintf(fp, "beta: %.16f\nphi: %.16f\nepsilon_i: %.16f\nepsilon_Y: %.16f\nsigma: %.16f\ngamma_1: %.16f\ngamma_2: %.16f\nkappa: %.16f\np: %.16f\nalpha: %.16f\ndelta: %.16f",
-				pbest->beta,
-				pbest->phi,
-				pbest->e1,
-				pbest->eY,
-				pbest->sigma,
-				pbest->gamma1,
-				pbest->gamma2,
-				pbest->kappa,
-				pbest->p,
-				pbest->alpha,
-				pbest->delta);
+				population->c2[0],
+				population->c2[1],
+				population->c2[2],
+				population->c2[3],
+				population->c2[4],
+				population->c2[5],
+				population->c2[6],
+				population->c2[7],
+				population->c2[8],
+				population->c2[9],
+				population->c2[10]);
 
-	store_trajectory(ic, pbest, fp);
+	store_trajectory(ic, population->c2, fp);
 	fclose(fp);
 	free(ic);
-	free(pbest);
 }
 
 void printf_genome(Genome * g) {
-	printf("%.8f,%ld,%ld,%ld", g->fitness, g->c1[0], g->c1[1], g->c1[2]);
-	printf("%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld\n",
+	printf("%.8f,%d,%d,%d", g->fitness, g->c1[0], g->c1[1], g->c1[2]);
+	printf("%.16f,%.16f,%.16f,%.16f,%.16f,%.16f,%.16f,%.16f,%.16f,%.16f,%.16f\n",
 			g->c2[0],
 			g->c2[1],
 			g->c2[2],
@@ -89,9 +57,9 @@ void printf_genome(Genome * g) {
 
 
 int main(int argc, char ** argv) {
-	int individuals = 400;
+	int individuals = 200;
 	if(argc > 1) individuals = atoi(argv[1]);
-	int maxiter = 10000; // ficar la possibilitat de donarho en runtime
+	int maxiter = 20000; // ficar la possibilitat de donarho en runtime
 	if(argc > 2) maxiter = atoi(argv[2]);
 	printf("Initializing with %d individuals and %d maxiter\n", individuals, maxiter);
 	int iter = 0;
@@ -101,7 +69,7 @@ int main(int argc, char ** argv) {
 	int number_crossover = 70;
 	int number_migration = individuals - number_elitism - number_selection - number_crossover;
 	int best_individual;
-	int mutation_bit = UL_SIZE;
+	double scale_factor = 0.1;
 
 	int cooldown = 200;
 	unsigned int extinction_period = 500;
@@ -115,7 +83,7 @@ int main(int argc, char ** argv) {
 	temp_population = (Genome *) malloc(individuals * sizeof(Genome));
 
 	fitness_func ff;
-	ff = fitness_exp;
+	ff = fitness_uniform;
 
 	int ek = 0;
 	int recovery = cooldown + 1 ;
@@ -137,19 +105,17 @@ int main(int argc, char ** argv) {
             if (population[i].fitness < 0) compute_fitness(population + i, ff); // TODO: parallel
 		}
 
-		if (iter % 100 == 0) {
+		if (iter % 1000 == 0) {
 			#pragma omp parallel for
 			for (i = 0; i < 100; i ++)
 				if (population[i].fitness > 0) optimise_parameters(population + i, ff);
 			// copy_genome(population + best_individual, temp_population);
 		}
 
-		mutation_bit = 1 + (int) (UL_SIZE - 1) * ((1.0 - ((float)iter) / ((float)maxiter)));
-
 		if (recovery < cooldown) {
 				best_individual = next_generation(population, temp_population,
 	                                          	number_survivors, extinc_selection, extinc_cross, extinc_migration,
-												0.3, mutation_bit);
+												0.3, scale_factor * (1 - ((double)iter) / ((double)maxiter)));
 				recovery++;
 				//if(iter % (maxiter/100) == 0)printf("Entering cooldown if\n");
 				fitness_temp=population[best_individual].fitness;
@@ -164,7 +130,7 @@ int main(int argc, char ** argv) {
 	        	} else {
 					best_individual = next_generation(population, temp_population,
 	                                          		number_elitism, number_selection, number_crossover, number_migration,
-													0.5, mutation_bit);
+													0.5, scale_factor * (1 - ((double)iter) / ((double)maxiter)));
 					//if(iter % (maxiter/100) == 0)printf("normal behaviour, values %.8f,%.8f\n",population[best_individual].fitness,fitness_temp);
 
 					if ((abs(population[best_individual].fitness -fitness_temp) < epsilon )

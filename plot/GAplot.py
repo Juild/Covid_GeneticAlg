@@ -1,7 +1,7 @@
 #GAplot
-import numpy as np 
-import pandas as pd 
-import matplotlib.pyplot as plt 
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
 colora="red"
 colori="blue"
@@ -52,7 +52,7 @@ plt.scatter(t1,re,color=colorr,marker="+")
 
 plt.plot(t,Dt,color=colord,label="deaths",alpha=0.8)
 plt.scatter(t1,de,color=colord,marker="+")
-plt.yscale("linear")
+plt.yscale("log")
 plt.legend()
 plt.grid()
 plt.title("uniform")

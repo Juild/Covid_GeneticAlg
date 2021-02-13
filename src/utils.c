@@ -33,12 +33,7 @@ unsigned int random_int(unsigned int n_max) {
     return gsl_rng_uniform_int(rng, n_max);
 }
 
-unsigned long random_gaussian(unsigned long mu, double sigma, int bits) {
-    long x;
-    do {
-        x = (long) (gsl_ran_gaussian(rng, sigma) * (1L << bits));
-    } while (x < mu);
-
-    printf("%ld\n", x + mu);
-    return (unsigned long) (((long) mu) + x);
+double random_gaussian(double sigma) {
+    // return gsl_ran_gaussian(rng, sigma);
+    return (random_double() * 2.0 - 1.0) * sigma;
 }
