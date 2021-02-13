@@ -4,6 +4,7 @@
 # include <stdlib.h>
 # include <stdio.h>
 # include <gsl/gsl_rng.h>
+# include <gsl/gsl_randist.h>
 # include <time.h>
 
 //functions
@@ -15,6 +16,7 @@ void free_rng();
 double random_double();
 unsigned long random_ulong();
 unsigned int random_int(unsigned int n_max);
+unsigned long random_gaussian(unsigned long mu, double sigma, int bits);
 
 # define DAYS 101
 # define N_PARAMS 5

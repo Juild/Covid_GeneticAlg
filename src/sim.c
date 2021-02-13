@@ -10,17 +10,17 @@ void genotype_to_phenotype(Genome * genome, double * c1, Parameters * c2) {
 	c1[7] = DATA[0][3];
 	c1[0] = POP_SIZE - (c1[1] + c1[2] + c1[3] + c1[4] + c1[5] + c1[6]);
 
-	c2 -> beta = crom2LSPar(genome -> c2[0]);
-	c2 -> phi = crom2LSPar(genome -> c2[1]);
+	c2 -> beta = crom2HSPar(genome -> c2[0]);
+	c2 -> phi = crom2Par(genome -> c2[1]);
 	c2 -> e1 = crom2LSPar(genome -> c2[2]);
 	c2 -> eY = crom2LSPar(genome -> c2[3]);
-	c2 -> sigma = crom2LSPar(genome -> c2[4]);
-	c2 -> gamma1 = crom2LSPar(genome -> c2[5]);
-	c2 -> gamma2 = crom2LSPar(genome -> c2[6]);
+	c2 -> sigma = crom2Par(genome -> c2[4]);
+	c2 -> gamma1 = crom2Par(genome -> c2[5]);
+	c2 -> gamma2 = crom2Par(genome -> c2[6]);
 	c2 -> kappa = crom2LSPar(genome -> c2[7]);
-	c2 -> p = crom2LSPar(genome -> c2[8]);
-	c2 -> alpha = crom2LSPar(genome -> c2[9]);
-	c2 -> delta = crom2LSPar(genome -> c2[10]);
+	c2 -> p = crom2Par(genome -> c2[8]);
+	c2 -> alpha = crom2HSPar(genome -> c2[9]);
+	c2 -> delta = crom2HSPar(genome -> c2[10]);
 }
 
 void fitness_uniform(int day, double * rk_data, double * f) {

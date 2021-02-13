@@ -2,21 +2,21 @@
 
 void generate_genome(Genome * genome) {
 	//generating initial states for chromosome 1
-	genome -> c1[0] = random_int(1000000000);
-	genome -> c1[1] = random_int(1000000000);
-	genome -> c1[2] = random_int(1000000000);
+	genome -> c1[0] = random_int(500000000);
+	genome -> c1[1] = random_int(500000000);
+	genome -> c1[2] = random_int(500000000);
 	//generating initial states for chromosome 2
-	genome -> c2[0] = random_int(1024);
-	genome -> c2[1] = random_int(1024);
+	genome -> c2[0] = ((unsigned long) random_int(1024)) << 30;
+	genome -> c2[1] = random_int(1024) << 10;
 	genome -> c2[2] = random_int(1024);
 	genome -> c2[3] = random_int(1024);
-	genome -> c2[4] = random_int(1024);
-	genome -> c2[5] = random_int(1024);
-	genome -> c2[6] = random_int(1024);
+	genome -> c2[4] = random_int(1024) << 10;
+	genome -> c2[5] = random_int(1024) << 10;
+	genome -> c2[6] = random_int(1024) << 10;
 	genome -> c2[7] = random_int(1024);
-	genome -> c2[8] = random_int(1024);
-	genome -> c2[9] = random_int(1024);
-	genome -> c2[10] = random_int(1024);
+	genome -> c2[8] = random_int(1024) << 10;
+	genome -> c2[9] = ((unsigned long) random_int(1024)) << 30;
+	genome -> c2[10] = ((unsigned long) random_int(1024)) << 30;
 
 	genome->fitness = -1;
 }
@@ -27,7 +27,6 @@ Genome * generate_population(int individuals) {
 	if( (population = (Genome *) malloc(individuals * sizeof(Genome)))== NULL )
 		exit_error("when allocating memory for the population",13);
 
-	// TODO: parallel
 	for (int i = 0; i < individuals; i++) generate_genome(population + i);
 
 	printf("Population of %d generated \n",individuals);
@@ -64,17 +63,17 @@ void mutate_genome(Genome * genome, double prob) {
 	if (scaled_mutation(genome->c1, prob, 30)
 		+ scaled_mutation(genome->c1 + 1, prob, 30)
 		+ scaled_mutation(genome->c1 + 2, prob, 30)
-		+ scaled_mutation(genome->c2, prob, 40)
-		+ scaled_mutation(genome->c2 + 1, prob, 20)
-		+ scaled_mutation(genome->c2 + 2, prob, 10)
-		+ scaled_mutation(genome->c2 + 3, prob, 10)
-		+ scaled_mutation(genome->c2 + 4, prob, 20)
-		+ scaled_mutation(genome->c2 + 5, prob, 20)
-		+ scaled_mutation(genome->c2 + 6, prob, 20)
-		+ scaled_mutation(genome->c2 + 7, prob, 10)
-		+ scaled_mutation(genome->c2 + 8, prob, 20)
-		+ scaled_mutation(genome->c2 + 9, prob, 40)
-		+ scaled_mutation(genome->c2 + 10, prob, 40)) // gen `i` has been mutate, so reset fitness to default
+		+ scaled_mutation(genome->c2, prob, 30)
+		+ scaled_mutation(genome->c2 + 1, prob, 10)
+		+ scaled_mutation(genome->c2 + 2, prob, 6)
+		+ scaled_mutation(genome->c2 + 3, prob, 6)
+		+ scaled_mutation(genome->c2 + 4, prob, 10)
+		+ scaled_mutation(genome->c2 + 5, prob, 10)
+		+ scaled_mutation(genome->c2 + 6, prob, 10)
+		+ scaled_mutation(genome->c2 + 7, prob, 6)
+		+ scaled_mutation(genome->c2 + 8, prob, 10)
+		+ scaled_mutation(genome->c2 + 9, prob, 30)
+		+ scaled_mutation(genome->c2 + 10, prob, 30)) // gen `i` has been mutate, so reset fitness to default
 			genome->fitness = -1;
 }
 
@@ -265,6 +264,32 @@ void migration(
 	for (int i = 0; i < n_new; i++) generate_genome(genome + i);
 }
 
+void gaussian_migration(
+	Genome * genome,
+	int n_new,
+	Genome * best
+) {
+	unsigned long mask = 1UL << 10;
+
+	for (int i = 0; i < n_new; i++) {
+		genome[i].c1[0] = (best->c1[0] ^ (mask << 20)) + random_int(1 << 20);
+		genome[i].c1[1] = (best->c1[1] ^ (mask << 20)) + random_int(1 << 20);
+		genome[i].c1[2] = (best->c1[2] ^ (mask << 20)) + random_int(1 << 20);
+		genome[i].c2[0] = (best->c2[0] ^ (mask << 30)) + random_int(1 << 30);
+		genome[i].c2[1] = (best->c2[1] ^ (mask << 10)) + random_int(1 << 10);
+		genome[i].c2[2] = (best->c2[2] ^ (mask << 6)) + random_int(1 << 4);
+		genome[i].c2[3] = (best->c2[3] ^ (mask << 6)) + random_int(1 << 4);
+		genome[i].c2[4] = (best->c2[4] ^ (mask << 10)) + random_int(1 << 10);
+		genome[i].c2[5] = (best->c2[5] ^ (mask << 10)) + random_int(1 << 10);
+		genome[i].c2[6] = (best->c2[6] ^ (mask << 10)) + random_int(1 << 10);
+		genome[i].c2[7] = (best->c2[7] ^ (mask << 6)) + random_int(1 << 4);
+		genome[i].c2[8] = (best->c2[8] ^ (mask << 10)) + random_int(1 << 10);
+		genome[i].c2[9] = (best->c2[9] ^ (mask << 30)) + random_int(1 << 30);
+		genome[i].c2[10] = (best->c2[10] ^ (mask << 30)) + random_int(1 << 30);
+		genome[i].fitness = -1;
+	}
+}
+
 /*
  * Copies the information in the input genome to the output genome.
  * Note that the fitness function is also copied over.
@@ -297,7 +322,10 @@ int next_generation(
 	if (p_mutation > 0)
 		for (i = n_elitism; i < pop_size - n_new; i++) mutate_genome(children + i, p_mutation);
 
-	if (n_new > 0) migration(children + (pop_size - n_new), n_new);
+	if (n_new > 0) {
+		// gaussian_migration(children + (pop_size - n_new), n_new, parents + best_individual);
+		migration(children + (pop_size - n_new), n_new);
+	}
 
 	return best_individual;
 }
