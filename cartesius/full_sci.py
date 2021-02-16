@@ -113,6 +113,11 @@ POP_SIZE = 1000000
 logging.basicConfig(filename='sim.log', level=logging.DEBUG)
 
 
+def fitness_uniform(rk):
+    weight = 1. / 100.
+    return np.sum(np.sum(np.power(rk - DATA, 2.0), axis=1) * weight)
+
+
 def fitness_linear(rk, nu=0.05):
     weight = np.arange(1, 101, 1) * 0.00019802
     return np.sum(np.sum(np.power(rk - DATA, 2.0), axis=1) * weight)
@@ -178,8 +183,11 @@ if __name__ == '__main__':
     # logging.info('{}'.format(res.fun))
     # logging.info('\n\nSolver info:\n{}'.format(res))
 
-    y = np.array([2.91933616e+01, 5.31691915e+00, 1.43503554e+01, 2.70574836e-01, 6.87159265e-01, 5.18435621e-01,
-                  5.66710845e-01, 2.03461206e-01, 5.83387843e-02, 8.21008768e-02, 4.88990375e-01, 5.86848718e-01,
-                  5.23592802e-02, 1.45014186e-02])
-
-    f(y)
+    y = np.array([0.535, 34.818, 0.258, 0.5229266448128909, 0.3591487452117864, 0.54895246742329240,
+                  0.0548992198671713, 0.1250979104527459, 0.0581648042779160, 0.0851909224685816,
+                  0.760644891536944, 0.6083176142155743, 0.0532664693046163, 0.0145002829619881])
+    print(f(y))
+    res = minimize(f, y, bounds=bounds)
+    print(res.x)
+    print(res.fun)
+    print(res)

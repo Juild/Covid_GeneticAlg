@@ -57,9 +57,9 @@ void printf_genome(Genome * g) {
 
 
 int main(int argc, char ** argv) {
-	int individuals = 200;
+	int individuals = 250;
 	if(argc > 1) individuals = atoi(argv[1]);
-	int maxiter = 20000; // ficar la possibilitat de donarho en runtime
+	int maxiter = 40000; // ficar la possibilitat de donarho en runtime
 	if(argc > 2) maxiter = atoi(argv[2]);
 	printf("Initializing with %d individuals and %d maxiter\n", individuals, maxiter);
 	int iter = 0;
@@ -69,7 +69,7 @@ int main(int argc, char ** argv) {
 	int number_crossover = 70;
 	int number_migration = individuals - number_elitism - number_selection - number_crossover;
 	int best_individual;
-	double scale_factor = 0.1;
+	double scale_factor = 0.5;
 
 	int cooldown = 200;
 	unsigned int extinction_period = 500;
@@ -83,7 +83,7 @@ int main(int argc, char ** argv) {
 	temp_population = (Genome *) malloc(individuals * sizeof(Genome));
 
 	fitness_func ff;
-	ff = fitness_uniform;
+	ff = fitness_exp;
 
 	int ek = 0;
 	int recovery = cooldown + 1 ;
@@ -130,7 +130,7 @@ int main(int argc, char ** argv) {
 	        	} else {
 					best_individual = next_generation(population, temp_population,
 	                                          		number_elitism, number_selection, number_crossover, number_migration,
-													0.5, scale_factor * (1 - ((double)iter) / ((double)maxiter)));
+													0.5, GSL_MAX(scale_factor * (1 - ((double)iter) / ((double)maxiter)), 0.000000001));
 					//if(iter % (maxiter/100) == 0)printf("normal behaviour, values %.8f,%.8f\n",population[best_individual].fitness,fitness_temp);
 
 					if ((abs(population[best_individual].fitness -fitness_temp) < epsilon )
@@ -139,11 +139,6 @@ int main(int argc, char ** argv) {
 				}
 			}
 
-/*
-		best_individual = next_generation(population, temp_population,
-										number_elitism, number_selection, number_crossover, number_migration,
-										0.1, mutation_bit);
-*/
 		// mutation_bit = UL_SIZE;
 		if (iter % (maxiter/100) == 0)
 			printf("Generation %d with fitness %.8f\n", iter, population[best_individual].fitness);
