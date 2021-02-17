@@ -59,7 +59,7 @@ void printf_genome(Genome * g) {
 int main(int argc, char ** argv) {
 	int individuals = 250;
 	if(argc > 1) individuals = atoi(argv[1]);
-	int maxiter = 40000; // ficar la possibilitat de donarho en runtime
+	int maxiter = 20000; // ficar la possibilitat de donarho en runtime
 	if(argc > 2) maxiter = atoi(argv[2]);
 	printf("Initializing with %d individuals and %d maxiter\n", individuals, maxiter);
 	int iter = 0;

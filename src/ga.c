@@ -2,9 +2,9 @@
 
 void generate_genome(Genome * genome) {
 	//generating initial states for chromosome 1
-	genome -> c1[0] = random_int(5000000);
-	genome -> c1[1] = random_int(5000000);
-	genome -> c1[2] = random_int(5000000);
+	genome -> c1[0] = random_int(500000);
+	genome -> c1[1] = random_int(500000);
+	genome -> c1[2] = random_int(500000);
 	//generating initial states for chromosome 2
 	genome -> c2[0] = random_double();
 	genome -> c2[1] = random_double();
@@ -40,15 +40,6 @@ void tinder(Genome * population, int pop_size, Genome * out) { //Superlike
 	while ((ind2 = random_int(pop_size)) == ind1);
 
 	crossover_genomes(population + ind1, population + ind2, out);
-}
-
-//genetic functions
-int bitwise_mutation(unsigned long *f, double prob) {
-	if (random_double() < prob) {
-		*f = (*f)^(1U << random_int(UL_SIZE));
-		return 1;
-	}
-	return 0;
 }
 
 int scaled_mutation(unsigned int *f, double prob, int max_bit) {
@@ -110,17 +101,17 @@ void crossover_genomes(
 	int val = random_int(GENES_C1 + GENES_C2 - 1) + 1;
 	if (val < GENES_C1) {
 		// crossover in the first chromosome
-		memcpy(out->c1, gen1in->c1, val * UL_SIZE);
-		memcpy(out->c1, gen2in->c1, (GENES_C1 - val) * UL_SIZE);
+		memcpy(out->c1, gen1in->c1, val * DL_SIZE);
+		memcpy(out->c1 + val, gen2in->c1 + val, (GENES_C1 - val) * DL_SIZE);
 
 		memcpy(out->c2, gen2in->c2, GENES_C2 * DL_SIZE);
 	} else {
 		// crossover in the 2nd chromosome
-		memcpy(out->c1, gen1in->c1, GENES_C1 * UL_SIZE);
+		memcpy(out->c1, gen1in->c1, GENES_C1 * DL_SIZE);
 
 		val -= GENES_C1;
 		memcpy(out->c2, gen1in->c2, val * DL_SIZE);
-		memcpy(out->c2, gen2in->c2, (GENES_C2 - val) * DL_SIZE);
+		memcpy(out->c2 + val, gen2in->c2 + val, (GENES_C2 - val) * DL_SIZE);
 	}
 
 	out->fitness = -1;
@@ -261,8 +252,8 @@ void migration(
  * Note that the fitness function is also copied over.
  */
 void copy_genome(Genome * in, Genome * out) {
-	memcpy(out->c1, in->c1, GENES_C1 * UL_SIZE);
-	memcpy(out->c2, in->c2, GENES_C2 * UL_SIZE);
+	memcpy(out->c1, in->c1, GENES_C1 * DL_SIZE);
+	memcpy(out->c2, in->c2, GENES_C2 * DL_SIZE);
 	out->fitness = in->fitness;
 }
 
