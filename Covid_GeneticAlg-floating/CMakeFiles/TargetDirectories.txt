@@ -1,0 +1,7 @@
+/home/oriol/Escriptori/GAfinal/Covid_GeneticAlg-floating/CMakeFiles/install/strip.dir
+/home/oriol/Escriptori/GAfinal/Covid_GeneticAlg-floating/CMakeFiles/install/local.dir
+/home/oriol/Escriptori/GAfinal/Covid_GeneticAlg-floating/CMakeFiles/install.dir
+/home/oriol/Escriptori/GAfinal/Covid_GeneticAlg-floating/CMakeFiles/list_install_components.dir
+/home/oriol/Escriptori/GAfinal/Covid_GeneticAlg-floating/CMakeFiles/rebuild_cache.dir
+/home/oriol/Escriptori/GAfinal/Covid_GeneticAlg-floating/CMakeFiles/edit_cache.dir
+/home/oriol/Escriptori/GAfinal/Covid_GeneticAlg-floating/CMakeFiles/covidga.dir
