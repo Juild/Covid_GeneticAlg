@@ -115,7 +115,7 @@ int float_mutation(double *f, double prob, double sigma) {
 	return 0;
 }
 /*
- * Main function for the mutation operator 
+ * Main function for the mutation operator
  *
  * @param genome genome of a single individual
  * @param prob probability of the mutation
@@ -144,7 +144,7 @@ void mutate_genome(Genome * genome, double prob, double sigma) {
 /*
  * Function for the crossover mechanism
  *
- * @param gen1in parent 1 
+ * @param gen1in parent 1
  * @param gen2in parent 2
  * @param out children
  */
@@ -158,16 +158,16 @@ void crossover_genomes(
 	if (val < GENES_C1) {
 		// crossover in the first chromosome
 		memcpy(out->c1, gen1in->c1, val * UL_SIZE);
-		memcpy(out->c1, gen2in->c1, (GENES_C1 - val) * UL_SIZE);
+		memcpy(out->c1 + val, gen2in->c1 + val, (GENES_C1 - val) * UL_SIZE);
 
-		memcpy(out->c2, gen2in->c2, GENES_C2 * DL_SIZE);
+		memcpy(out->c2, gen2in->c2, GENES_C2 * UL_SIZE);
 	} else {
 		// crossover in the 2nd chromosome
 		memcpy(out->c1, gen1in->c1, GENES_C1 * UL_SIZE);
 
 		val -= GENES_C1;
-		memcpy(out->c2, gen1in->c2, val * DL_SIZE);
-		memcpy(out->c2, gen2in->c2, (GENES_C2 - val) * DL_SIZE);
+		memcpy(out->c2, gen1in->c2, val * UL_SIZE);
+		memcpy(out->c2 + val, gen2in->c2 + val, (GENES_C2 - val) * UL_SIZE);
 	}
 
 	out->fitness = -1;
@@ -323,7 +323,7 @@ void copy_genome(Genome * in, Genome * out) {
 }
 
 /*
- * Main function of the ga.c 
+ * Main function of the ga.c
  * calculates the next generation of the population with
  * all the operations of genetic algorithm
  *

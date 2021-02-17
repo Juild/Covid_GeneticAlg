@@ -19,7 +19,7 @@
  * @param genome the genome of a single individual
  */
 void generate_genome(Genome * genome) {
-	
+
 	//generating initial states for chromosome 1
 	genome -> c1[0] = random_int(1000000000);
 	genome -> c1[1] = random_int(1000000000);
@@ -47,7 +47,7 @@ void generate_genome(Genome * genome) {
  * @param individuals number of individuals of the population
  */
 Genome * generate_population(int individuals) {
-	
+
 
 	Genome * population;
 
@@ -68,10 +68,10 @@ Genome * generate_population(int individuals) {
  * @param pop_size the total population size
  * @param out the temporal population to fill for the next generation
  */
-void crossing(Genome * population, int pop_size, Genome * out) { 
+void crossing(Genome * population, int pop_size, Genome * out) {
 
 
-	
+
 	int ind1 = random_int(pop_size);
 	int ind2;
 
@@ -111,7 +111,7 @@ int scaled_mutation(unsigned long *f, double prob, int max_bit) {
 }
 
 /*
- * Main function for the mutation operator 
+ * Main function for the mutation operator
  *
  * @param genome genome of a single individual
  * @param prob probability of the mutation
@@ -166,7 +166,7 @@ void scaled_mutate_genome(Genome * genome, double prob, int max_bit) {
 /*
  * Function for the crossover mechanism
  *
- * @param gen1in parent 1 
+ * @param gen1in parent 1
  * @param gen2in parent 2
  * @param out children
  */
@@ -184,7 +184,7 @@ void crossover_genomes(
 	if (val < GENES_C1) {
 		// crossover in the first chromosome
 		memcpy(out->c1, gen1in->c1, val * UL_SIZE);
-		memcpy(out->c1, gen2in->c1, (GENES_C1 - val) * UL_SIZE);
+		memcpy(out->c1 + val, gen2in->c1 + val, (GENES_C1 - val) * UL_SIZE);
 
 		memcpy(out->c2, gen2in->c2, GENES_C2 * UL_SIZE);
 	} else {
@@ -193,7 +193,7 @@ void crossover_genomes(
 
 		val -= GENES_C1;
 		memcpy(out->c2, gen1in->c2, val * UL_SIZE);
-		memcpy(out->c2, gen2in->c2, (GENES_C2 - val) * UL_SIZE);
+		memcpy(out->c2 + val, gen2in->c2 + val, (GENES_C2 - val) * UL_SIZE);
 	}
 
 	out->fitness = -1;
@@ -351,7 +351,7 @@ void copy_genome(Genome * in, Genome * out) {
 }
 
 /*
- * Main function of the ga.c 
+ * Main function of the ga.c
  * calculates the next generation of the population with
  * all the operations of genetic algorithm
  *
